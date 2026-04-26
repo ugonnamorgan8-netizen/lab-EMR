@@ -1,0 +1,542 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id               String       @id @default(cuid())
+  name             String
+  email            String       @unique
+  passwordHash     String
+  role             Role
+  department       String?
+  status           UserStatus   @default(ACTIVE)
+  lastLogin        DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  auditLogs        AuditLog[]
+  collectedSamples Sample[]     @relation("CollectedBy")
+  validatedResults TestResult[] @relation("ValidatedBy")
+  dispatchedReports Report[]    @relation("DispatchedBy")
+  qcEntries        QCEntry[]
+}
+
+enum Role {
+  RECEPTIONIST
+  PHLEBOTOMIST
+  LAB_SCIENTIST
+  LAB_TECHNICIAN
+  QC_OFFICER
+  DISPATCH_OFFICER
+  ACCOUNTANT
+  LAB_MANAGER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+model Patient {
+  id                String    @id @default(cuid())
+  patientId         String    @unique
+  firstName         String
+  lastName          String
+  dateOfBirth       DateTime
+  gender            String
+  phone             String
+  email             String?
+  address           String?
+  emergencyContact  String?
+  emergencyPhone    String?
+  insuranceProvider String?
+  policyNumber      String?
+  nationality       String?
+  referringDoctor   String?
+  referringFacility String?
+  clinicalHistory   String?
+  allergies         String[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  visits            Visit[]
+  invoices          Invoice[]
+}
+
+model Visit {
+  id                String      @id @default(cuid())
+  visitId           String      @unique
+  patientId         String
+  patient           Patient     @relation(fields: [patientId], references: [id])
+  type              VisitType   @default(WALK_IN)
+  referralLetter    String?
+  referringDoctor   String?
+  referringFacility String?
+  clinicalHistory   String?
+  urgency           Urgency     @default(ROUTINE)
+  status            VisitStatus @default(REGISTERED)
+  registeredAt      DateTime    @default(now())
+  samples           Sample[]
+  invoice           Invoice?
+  report            Report?
+}
+
+enum VisitType {
+  WALK_IN
+  REFERRAL
+  CORPORATE
+  HOME_COLLECTION
+}
+
+enum VisitStatus {
+  REGISTERED
+  SAMPLE_COLLECTED
+  IN_PROCESSING
+  AWAITING_QC
+  VALIDATED
+  DISPATCHED
+  CANCELLED
+}
+
+enum Urgency {
+  ROUTINE
+  URGENT
+  STAT
+}
+
+model Sample {
+  id            String          @id @default(cuid())
+  specimenId    String          @unique
+  visitId       String
+  visit         Visit           @relation(fields: [visitId], references: [id])
+  specimenType  SpecimenType
+  volume        Float?
+  container     String
+  collectedById String?
+  collectedBy   User?           @relation("CollectedBy", fields: [collectedById], references: [id])
+  collectedAt   DateTime?
+  condition     SampleCondition @default(ACCEPTABLE)
+  conditionNote String?
+  status        SampleStatus    @default(PENDING_COLLECTION)
+  testOrders    TestOrder[]
+  createdAt     DateTime        @default(now())
+}
+
+enum SpecimenType {
+  WHOLE_BLOOD
+  SERUM
+  PLASMA
+  URINE
+  STOOL
+  SPUTUM
+  SWAB
+  CSF
+  TISSUE
+  ASPIRATE
+  SCRAPING
+  OTHER
+}
+
+enum SampleCondition {
+  ACCEPTABLE
+  HAEMOLYSED
+  LIPAEMIC
+  ICTERIC
+  CLOTTED
+  INSUFFICIENT
+  WRONG_CONTAINER
+  UNLABELLED
+  REJECTED
+}
+
+enum SampleStatus {
+  PENDING_COLLECTION
+  COLLECTED
+  IN_TRANSIT
+  RECEIVED_LAB
+  IN_CENTRIFUGE
+  ALIQUOTED
+  IN_ANALYSIS
+  ANALYSIS_COMPLETE
+  STORED
+  DISPOSED
+}
+
+model TestOrder {
+  id            String        @id @default(cuid())
+  orderId       String        @unique
+  sampleId      String
+  sample        Sample        @relation(fields: [sampleId], references: [id])
+  testPanelId   String?
+  testPanel     TestPanel?    @relation(fields: [testPanelId], references: [id])
+  testCatalogId String
+  testCatalog   TestCatalog   @relation(fields: [testCatalogId], references: [id])
+  urgency       Urgency       @default(ROUTINE)
+  status        OrderStatus   @default(PENDING)
+  tatDeadline   DateTime?
+  orderedAt     DateTime      @default(now())
+  result        TestResult?
+  billingItem   BillingItem?
+  referralTest  ReferralTest?
+}
+
+enum OrderStatus {
+  PENDING
+  IN_ANALYSIS
+  RESULTED
+  VALIDATED
+  REPORTED
+  REFERRED_OUT
+  CANCELLED
+}
+
+model TestCatalog {
+  id              String          @id @default(cuid())
+  code            String          @unique
+  name            String
+  category        TestCategory
+  department      String
+  specimenTypes   SpecimenType[]
+  container       String
+  sampleVolume    Float
+  tatHoursRoutine Int             @default(24)
+  tatHoursUrgent  Int             @default(6)
+  tatHoursStat    Int             @default(2)
+  price           Float
+  parameters      TestParameter[]
+  testOrders      TestOrder[]
+  panelItems      TestPanelItem[]
+  qcMaterials     QCMaterial[]
+  active          Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+}
+
+enum TestCategory {
+  HAEMATOLOGY
+  BIOCHEMISTRY
+  MICROBIOLOGY
+  SEROLOGY_IMMUNOLOGY
+  HISTOPATHOLOGY
+  CYTOLOGY
+  PARASITOLOGY
+  URINALYSIS
+  COAGULATION
+  HORMONES
+  TUMOUR_MARKERS
+  DRUGS_TOXICOLOGY
+  OTHER
+}
+
+model TestParameter {
+  id              String           @id @default(cuid())
+  testCatalogId   String
+  testCatalog     TestCatalog      @relation(fields: [testCatalogId], references: [id])
+  name            String
+  unit            String
+  referenceRanges ReferenceRange[]
+  sortOrder       Int              @default(0)
+  resultValues    ResultValue[]
+}
+
+model ReferenceRange {
+  id           String        @id @default(cuid())
+  parameterId  String
+  parameter    TestParameter @relation(fields: [parameterId], references: [id])
+  gender       String?
+  ageMinYears  Int?
+  ageMaxYears  Int?
+  normalLow    Float?
+  normalHigh   Float?
+  criticalLow  Float?
+  criticalHigh Float?
+  unit         String
+}
+
+model TestPanel {
+  id          String          @id @default(cuid())
+  code        String          @unique
+  name        String
+  description String?
+  price       Float
+  items       TestPanelItem[]
+  testOrders  TestOrder[]
+  active      Boolean         @default(true)
+}
+
+model TestPanelItem {
+  id            String      @id @default(cuid())
+  panelId       String
+  panel         TestPanel   @relation(fields: [panelId], references: [id])
+  testCatalogId String
+  testCatalog   TestCatalog @relation(fields: [testCatalogId], references: [id])
+}
+
+model TestResult {
+  id               String       @id @default(cuid())
+  testOrderId      String       @unique
+  testOrder        TestOrder    @relation(fields: [testOrderId], references: [id])
+  values           ResultValue[]
+  interpretation   String?
+  method           String?
+  instrument       String?
+  runId            String?
+  technicianNote   String?
+  status           ResultStatus @default(PENDING)
+  enteredAt        DateTime?
+  enteredBy        String?
+  validatedAt      DateTime?
+  validatedById    String?
+  validatedBy      User?        @relation("ValidatedBy", fields: [validatedById], references: [id])
+  deltaCheckPassed Boolean?
+  deltaCheckNote   String?
+  createdAt        DateTime     @default(now())
+}
+
+enum ResultStatus {
+  PENDING
+  ENTERED
+  DELTA_CHECK_FAILED
+  QC_FAILED
+  VALIDATED
+  AMENDED
+  CANCELLED
+}
+
+model ResultValue {
+  id           String        @id @default(cuid())
+  testResultId String
+  testResult   TestResult    @relation(fields: [testResultId], references: [id])
+  parameterId  String
+  parameter    TestParameter @relation(fields: [parameterId], references: [id])
+  value        String
+  numericValue Float?
+  flag         ResultFlag    @default(NORMAL)
+  flagNote     String?
+}
+
+enum ResultFlag {
+  NORMAL
+  LOW
+  HIGH
+  CRITICAL_LOW
+  CRITICAL_HIGH
+  ABNORMAL
+  POSITIVE
+  NEGATIVE
+  INDETERMINATE
+  SEE_NOTE
+}
+
+model QCMaterial {
+  id            String      @id @default(cuid())
+  name          String
+  level         String
+  lotNumber     String
+  expiryDate    DateTime
+  testCatalogId String
+  testCatalog   TestCatalog @relation(fields: [testCatalogId], references: [id])
+  targetMean    Float
+  targetSD      Float
+  entries       QCEntry[]
+  active        Boolean     @default(true)
+}
+
+model QCEntry {
+  id           String     @id @default(cuid())
+  qcMaterialId String
+  qcMaterial   QCMaterial @relation(fields: [qcMaterialId], references: [id])
+  value        Float
+  zScore       Float
+  rule         QCRule     @default(IN_CONTROL)
+  note         String?
+  runDate      DateTime   @default(now())
+  enteredById  String
+  enteredBy    User       @relation(fields: [enteredById], references: [id])
+}
+
+enum QCRule {
+  IN_CONTROL
+  WARNING_1_2S
+  REJECT_1_3S
+  REJECT_2_2S
+  REJECT_R_4S
+  REJECT_4_1S
+  REJECT_10X
+}
+
+model ReferralTest {
+  id              String         @id @default(cuid())
+  testOrderId     String         @unique
+  testOrder       TestOrder      @relation(fields: [testOrderId], references: [id])
+  referralLabName String
+  referralLabCode String?
+  sentAt          DateTime?
+  expectedBackAt  DateTime?
+  receivedAt      DateTime?
+  trackingRef     String?
+  status          ReferralStatus @default(PENDING)
+  cost            Float?
+  notes           String?
+  createdAt       DateTime       @default(now())
+}
+
+enum ReferralStatus {
+  PENDING
+  SENT
+  IN_TRANSIT
+  RECEIVED_BACK
+  RESULTED
+  REJECTED
+}
+
+model Report {
+  id             String           @id @default(cuid())
+  reportId       String           @unique
+  visitId        String           @unique
+  visit          Visit            @relation(fields: [visitId], references: [id])
+  generatedAt    DateTime?
+  dispatchedAt   DateTime?
+  dispatchedById String?
+  dispatchedBy   User?            @relation("DispatchedBy", fields: [dispatchedById], references: [id])
+  deliveryMethod DeliveryMethod[]
+  pdfUrl         String?
+  status         ReportStatus     @default(PENDING)
+  amendmentNote  String?
+  amendedAt      DateTime?
+}
+
+enum DeliveryMethod {
+  PRINT
+  EMAIL
+  SMS
+  PORTAL
+  WHATSAPP
+}
+
+enum ReportStatus {
+  PENDING
+  GENERATED
+  DISPATCHED
+  AMENDED
+}
+
+model Invoice {
+  id              String        @id @default(cuid())
+  invoiceId       String        @unique
+  patientId       String
+  patient         Patient       @relation(fields: [patientId], references: [id])
+  visitId         String        @unique
+  visit           Visit         @relation(fields: [visitId], references: [id])
+  lineItems       BillingItem[]
+  subtotal        Float
+  discount        Float         @default(0)
+  insuranceAmount Float         @default(0)
+  vatAmount       Float         @default(0)
+  totalAmount     Float
+  patientBalance  Float
+  status          InvoiceStatus @default(UNPAID)
+  paidAt          DateTime?
+  payments        Payment[]
+  createdAt       DateTime      @default(now())
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PARTIAL
+  PAID
+  VOID
+  CORPORATE
+}
+
+model BillingItem {
+  id          String     @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice    @relation(fields: [invoiceId], references: [id])
+  testOrderId String?    @unique
+  testOrder   TestOrder? @relation(fields: [testOrderId], references: [id])
+  description String
+  quantity    Int        @default(1)
+  unitPrice   Float
+  discount    Float      @default(0)
+  total       Float
+}
+
+model Payment {
+  id         String        @id @default(cuid())
+  invoiceId  String
+  invoice    Invoice       @relation(fields: [invoiceId], references: [id])
+  amount     Float
+  method     PaymentMethod
+  reference  String?
+  recordedAt DateTime      @default(now())
+  recordedBy String
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  HMO
+  POS
+}
+
+model CorporateClient {
+  id           String   @id @default(cuid())
+  name         String
+  code         String   @unique
+  contactName  String?
+  contactPhone String?
+  contactEmail String?
+  address      String?
+  discountRate Float    @default(0)
+  creditLimit  Float    @default(0)
+  balance      Float    @default(0)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}
+
+model Notification {
+  id           String           @id @default(cuid())
+  userId       String
+  type         NotificationType
+  title        String
+  message      String
+  resourceLink String?
+  read         Boolean          @default(false)
+  createdAt    DateTime         @default(now())
+}
+
+enum NotificationType {
+  CRITICAL_RESULT
+  QC_FAILURE
+  TAT_BREACH
+  SAMPLE_REJECTED
+  REFERRAL_RECEIVED
+  RESULT_READY
+  LOW_QC_STOCK
+  PAYMENT_RECEIVED
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  action       String
+  resourceType String
+  resourceId   String
+  ipAddress    String?
+  metadata     Json?
+  createdAt    DateTime @default(now())
+}
+
+model SystemSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

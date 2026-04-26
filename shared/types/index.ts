@@ -1,0 +1,134 @@
+import { z } from "zod";
+
+export const roles = [
+  "RECEPTIONIST",
+  "PHLEBOTOMIST",
+  "LAB_SCIENTIST",
+  "LAB_TECHNICIAN",
+  "QC_OFFICER",
+  "DISPATCH_OFFICER",
+  "ACCOUNTANT",
+  "LAB_MANAGER",
+  "ADMIN",
+] as const;
+
+export const roleSchema = z.enum(roles);
+export type Role = z.infer<typeof roleSchema>;
+
+export const urgencySchema = z.enum(["ROUTINE", "URGENT", "STAT"]);
+export type Urgency = z.infer<typeof urgencySchema>;
+
+export const visitStatusSchema = z.enum([
+  "REGISTERED",
+  "SAMPLE_COLLECTED",
+  "IN_PROCESSING",
+  "AWAITING_QC",
+  "VALIDATED",
+  "DISPATCHED",
+  "CANCELLED",
+]);
+export type VisitStatus = z.infer<typeof visitStatusSchema>;
+
+export const patientRegistrationSchema = z.object({
+  firstName: z.string().trim().min(1, "First name is required"),
+  lastName: z.string().trim().min(1, "Last name is required"),
+  dateOfBirth: z.string().min(1, "Date of birth is required"),
+  gender: z.enum(["Male", "Female", "Other"]),
+  phone: z.string().trim().min(1, "Phone is required"),
+  email: z.string().email().optional().or(z.literal("")),
+  address: z.string().optional(),
+  emergencyContact: z.string().optional(),
+  emergencyPhone: z.string().optional(),
+  insuranceProvider: z.string().optional(),
+  policyNumber: z.string().optional(),
+  nationality: z.string().optional(),
+  referringDoctor: z.string().optional(),
+  referringFacility: z.string().optional(),
+  clinicalHistory: z.string().optional(),
+  allergies: z.array(z.string()).default([]),
+});
+export type PatientRegistrationInput = z.infer<typeof patientRegistrationSchema>;
+export type PatientRegistrationFormInput = z.input<typeof patientRegistrationSchema>;
+
+export const visitTypeSchema = z.enum([
+  "WALK_IN",
+  "REFERRAL",
+  "CORPORATE",
+  "HOME_COLLECTION",
+]);
+export type VisitType = z.infer<typeof visitTypeSchema>;
+
+export const createVisitSchema = z.object({
+  patientId: z.string().min(1, "Patient is required"),
+  type: visitTypeSchema.default("WALK_IN"),
+  urgency: urgencySchema.default("ROUTINE"),
+  referralLetter: z.string().optional(),
+  referringDoctor: z.string().optional(),
+  referringFacility: z.string().optional(),
+  clinicalHistory: z.string().optional(),
+  tests: z
+    .array(
+      z.object({
+        testCatalogId: z.string().min(1),
+        urgency: urgencySchema.default("ROUTINE"),
+      }),
+    )
+    .min(1, "Select at least one test"),
+});
+export type CreateVisitInput = z.infer<typeof createVisitSchema>;
+
+export const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+export type LoginInput = z.infer<typeof loginSchema>;
+
+export const paymentMethodSchema = z.enum([
+  "CASH",
+  "CARD",
+  "BANK_TRANSFER",
+  "HMO",
+  "POS",
+]);
+export type PaymentMethod = z.infer<typeof paymentMethodSchema>;
+
+export const recordPaymentSchema = z.object({
+  amount: z.number().positive("Amount must be greater than zero"),
+  method: paymentMethodSchema,
+  reference: z.string().optional(),
+});
+export type RecordPaymentInput = z.infer<typeof recordPaymentSchema>;
+
+export const sampleConditionSchema = z.enum([
+  "ACCEPTABLE",
+  "HAEMOLYSED",
+  "LIPAEMIC",
+  "ICTERIC",
+  "CLOTTED",
+  "INSUFFICIENT",
+  "WRONG_CONTAINER",
+  "UNLABELLED",
+  "REJECTED",
+]);
+export type SampleCondition = z.infer<typeof sampleConditionSchema>;
+
+export const collectSampleSchema = z.object({
+  collectedAt: z.string(),
+  condition: sampleConditionSchema,
+  conditionNote: z.string().optional(),
+});
+export type CollectSampleInput = z.infer<typeof collectSampleSchema>;
+
+export const apiErrorSchema = z.object({
+  message: z.string(),
+  details: z.record(z.string(), z.array(z.string())).optional(),
+});
+export type ApiError = z.infer<typeof apiErrorSchema>;
+
+export type AuthUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  department?: string | null;
+};

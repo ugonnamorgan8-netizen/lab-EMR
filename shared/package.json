@@ -1,0 +1,5 @@
+{
+  "name": "@lab-emr/shared",
+  "private": true,
+  "type": "module"
+}
