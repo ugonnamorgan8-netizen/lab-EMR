@@ -70,6 +70,12 @@ On deploy, Render is configured to:
 5. build the frontend and backend
 6. start the app
 
+Important build note:
+
+- the build command should be `npm install --include=dev && npm run prisma:generate --workspace server && npm run build`
+- Render can skip devDependencies when `NODE_ENV=production`
+- the client build needs devDependencies like `vite`, so using plain `npm install` can fail with `Cannot find type definition file for 'vite/client'`
+
 ## 6. Demo login
 
 After the seed finishes, use one of these demo accounts:

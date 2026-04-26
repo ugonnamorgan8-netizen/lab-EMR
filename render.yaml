@@ -4,7 +4,7 @@ services:
     runtime: node
     plan: free
     rootDir: .
-    buildCommand: npm install && npm run prisma:generate --workspace server && npm run build
+    buildCommand: npm install --include=dev && npm run prisma:generate --workspace server && npm run build
     preDeployCommand: npm run prisma:push --workspace server && npm run seed --workspace server
     startCommand: npm run start
     autoDeploy: true
