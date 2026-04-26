@@ -3,7 +3,11 @@ import { io } from "socket.io-client";
 import { useAuthStore } from "../stores/authStore";
 import { useNotificationStore } from "../stores/notificationStore";
 
-const socket = io("http://localhost:4000", { autoConnect: false });
+const socketUrl =
+  import.meta.env.VITE_SOCKET_URL ??
+  (import.meta.env.DEV ? "http://localhost:4000" : window.location.origin);
+
+const socket = io(socketUrl, { autoConnect: false, withCredentials: true });
 
 export function useSocket() {
   const user = useAuthStore((state) => state.user);
