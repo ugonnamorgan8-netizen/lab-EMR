@@ -15,6 +15,10 @@ export const roles = [
 export const roleSchema = z.enum(roles);
 export type Role = z.infer<typeof roleSchema>;
 
+export const userStatuses = ["ACTIVE", "INACTIVE", "SUSPENDED"] as const;
+export const userStatusSchema = z.enum(userStatuses);
+export type UserStatus = z.infer<typeof userStatusSchema>;
+
 export const urgencySchema = z.enum(["ROUTINE", "URGENT", "STAT"]);
 export type Urgency = z.infer<typeof urgencySchema>;
 
@@ -82,6 +86,33 @@ export const loginSchema = z.object({
   password: z.string().min(6),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
+
+export const adminUserUpdateSchema = z
+  .object({
+    role: roleSchema.optional(),
+    status: userStatusSchema.optional(),
+    department: z.string().trim().min(1, "Department cannot be empty").optional().or(z.literal("")),
+  })
+  .refine((value) => value.role !== undefined || value.status !== undefined || value.department !== undefined, {
+    message: "Provide at least one field to update",
+  });
+export type AdminUserUpdateInput = z.infer<typeof adminUserUpdateSchema>;
+
+export const systemSettingUpdateSchema = z.object({
+  value: z.string(),
+});
+export type SystemSettingUpdateInput = z.infer<typeof systemSettingUpdateSchema>;
+
+export const adminCatalogTestUpdateSchema = z
+  .object({
+    department: z.string().trim().min(1, "Department is required").optional(),
+    price: z.number().nonnegative("Price must be zero or greater").optional(),
+    active: z.boolean().optional(),
+  })
+  .refine((value) => value.department !== undefined || value.price !== undefined || value.active !== undefined, {
+    message: "Provide at least one field to update",
+  });
+export type AdminCatalogTestUpdateInput = z.infer<typeof adminCatalogTestUpdateSchema>;
 
 export const paymentMethodSchema = z.enum([
   "CASH",

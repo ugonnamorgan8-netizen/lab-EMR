@@ -10,7 +10,7 @@ export function Sidebar({ items, userLabel }: { items: NavItem[]; userLabel: str
         <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">Lab EMR</p>
         <h1 className="mt-2 text-lg font-bold text-slate-900">Standalone Diagnostic Lab</h1>
       </div>
-      <nav className="flex-1 space-y-1 p-4">
+      <nav className="flex-1 space-y-1 overflow-y-auto p-4">
         {items.map((item) => (
           <NavLink
             key={item.to}

@@ -1,4 +1,5 @@
 import { OrderStatus, Role, UserStatus } from "@prisma/client";
+import type { AdminCatalogTestUpdateInput, AdminUserUpdateInput, SystemSettingUpdateInput } from "../../../shared/types/index.js";
 import { prisma } from "../lib/prisma.js";
 
 function startOfToday() {
@@ -310,4 +311,138 @@ export async function listAuditLogs() {
     createdAt: log.createdAt.toISOString(),
     user: log.user,
   }));
+}
+
+export async function updateAdminUser(userId: string, payload: AdminUserUpdateInput, actorId: string) {
+  const currentUser = await prisma.user.findUniqueOrThrow({
+    where: { id: userId },
+    select: {
+      id: true,
+      role: true,
+      status: true,
+      department: true,
+    },
+  });
+
+  const isChangingOwnPrivilege =
+    currentUser.id === actorId &&
+    ((payload.role !== undefined && payload.role !== currentUser.role) ||
+      (payload.status !== undefined && payload.status !== currentUser.status));
+
+  if (isChangingOwnPrivilege) {
+    throw new Error("You cannot change your own role or status from this screen");
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      role: payload.role,
+      status: payload.status,
+      department: payload.department === undefined ? undefined : payload.department || null,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      department: true,
+      status: true,
+      lastLogin: true,
+      createdAt: true,
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      userId: actorId,
+      action: "UPDATE_USER",
+      resourceType: "User",
+      resourceId: userId,
+      metadata: {
+        role: payload.role ?? null,
+        status: payload.status ?? null,
+        department: payload.department ?? null,
+      },
+    },
+  });
+
+  return {
+    ...updatedUser,
+    lastLogin: updatedUser.lastLogin?.toISOString() ?? null,
+    createdAt: updatedUser.createdAt.toISOString(),
+  };
+}
+
+export async function updateSystemSetting(key: string, payload: SystemSettingUpdateInput, actorId: string) {
+  const setting = await prisma.systemSetting.upsert({
+    where: { key },
+    update: {
+      value: payload.value,
+    },
+    create: {
+      key,
+      value: payload.value,
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      userId: actorId,
+      action: "UPDATE_SETTING",
+      resourceType: "SystemSetting",
+      resourceId: key,
+      metadata: {
+        value: payload.value,
+      },
+    },
+  });
+
+  return {
+    key: setting.key,
+    value: setting.value,
+    updatedAt: setting.updatedAt.toISOString(),
+  };
+}
+
+export async function updateAdminCatalogTest(testId: string, payload: AdminCatalogTestUpdateInput, actorId: string) {
+  const updatedTest = await prisma.testCatalog.update({
+    where: { id: testId },
+    data: {
+      department: payload.department,
+      price: payload.price,
+      active: payload.active,
+    },
+    include: {
+      parameters: {
+        include: {
+          referenceRanges: true,
+        },
+      },
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      userId: actorId,
+      action: "UPDATE_TEST_CATALOG",
+      resourceType: "TestCatalog",
+      resourceId: testId,
+      metadata: payload,
+    },
+  });
+
+  return {
+    id: updatedTest.id,
+    code: updatedTest.code,
+    name: updatedTest.name,
+    category: updatedTest.category,
+    department: updatedTest.department,
+    specimenTypes: updatedTest.specimenTypes,
+    container: updatedTest.container,
+    price: updatedTest.price,
+    active: updatedTest.active,
+    sampleVolume: updatedTest.sampleVolume,
+    parameterCount: updatedTest.parameters.length,
+    referenceRangeCount: updatedTest.parameters.reduce((sum, parameter) => sum + parameter.referenceRanges.length, 0),
+  };
 }
