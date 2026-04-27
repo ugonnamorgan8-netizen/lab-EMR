@@ -1,5 +1,10 @@
 import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import { AppShell } from "./components/layout/AppShell";
+import { AdminAnalyticsPage } from "./modules/admin/AdminAnalyticsPage";
+import { AdminAuditPage } from "./modules/admin/AdminAuditPage";
+import { AdminCatalogPage } from "./modules/admin/AdminCatalogPage";
+import { AdminSettingsPage } from "./modules/admin/AdminSettingsPage";
+import { AdminUsersPage } from "./modules/admin/AdminUsersPage";
 import { LoginPage } from "./modules/auth/LoginPage";
 import { InvoicePage } from "./modules/billing/InvoicePage";
 import { CollectionQueuePage } from "./modules/collection/CollectionQueuePage";
@@ -89,7 +94,12 @@ function ProtectedLayout() {
   const navItems = [...navByRole[user.role]];
 
   return (
-    <AppShell title="Lab Operations" subtitle={user.role.replaceAll("_", " ")} navItems={navItems} userLabel={`${user.name} • ${user.role.replaceAll("_", " ")}`}>
+    <AppShell
+      title="Lab Operations"
+      subtitle={user.role.replaceAll("_", " ")}
+      navItems={navItems}
+      userLabel={`${user.name} - ${user.role.replaceAll("_", " ")}`}
+    >
       <Outlet />
     </AppShell>
   );
@@ -118,19 +128,43 @@ export function App() {
         <Route path="collection/queue" element={<CollectionQueuePage />} />
         <Route path="collection/:visitId" element={<CollectionWorkspacePage />} />
         <Route path="billing/invoice/:visitId" element={<InvoicePage />} />
-        <Route path="preanalytics/queue" element={<PlaceholderPage title="Pre-analytics queue" description="Tracking, receive, and centrifuge screens land here next." />} />
-        <Route path="processing/worklist" element={<PlaceholderPage title="Processing worklist" description="Bench analysis, result entry, and delta check workflow will mount here." />} />
-        <Route path="qc/dashboard" element={<PlaceholderPage title="QC dashboard" description="Westgard rules, QC entry, and Levey-Jennings charts are queued for the next build slice." />} />
-        <Route path="validation/queue" element={<PlaceholderPage title="Validation queue" description="Scientific review and critical result acknowledgement workspace will appear here." />} />
-        <Route path="dispatch/queue" element={<PlaceholderPage title="Dispatch queue" description="Report preview, dispatch actions, and amendment history will live here." />} />
-        <Route path="referral/queue" element={<PlaceholderPage title="Referral queue" description="Send-out logging and referral result intake live here." />} />
-        <Route path="billing/dashboard" element={<PlaceholderPage title="Billing dashboard" description="Revenue, outstanding balances, and corporate billing analytics live here." />} />
-        <Route path="billing/outstanding" element={<PlaceholderPage title="Outstanding invoices" description="Ageing buckets and reminder workflows will render here." />} />
-        <Route path="admin/analytics" element={<PlaceholderPage title="Analytics dashboard" description="Operational metrics, TAT trends, and export tools live here." />} />
-        <Route path="admin/users" element={<PlaceholderPage title="User management" description="Role administration, status changes, and password reset actions will be added here." />} />
-        <Route path="admin/settings" element={<PlaceholderPage title="System settings" description="Lab profile, instruments, referral labs, billing config, and report template settings live here." />} />
-        <Route path="admin/catalog" element={<PlaceholderPage title="Test catalog management" description="Catalog, parameter, range, and panel management will live here." />} />
-        <Route path="admin/audit" element={<PlaceholderPage title="Audit log" description="Searchable operational audit records will render here." />} />
+        <Route
+          path="preanalytics/queue"
+          element={<PlaceholderPage title="Pre-analytics queue" description="Tracking, receive, and centrifuge screens land here next." />}
+        />
+        <Route
+          path="processing/worklist"
+          element={<PlaceholderPage title="Processing worklist" description="Bench analysis, result entry, and delta check workflow will mount here." />}
+        />
+        <Route
+          path="qc/dashboard"
+          element={<PlaceholderPage title="QC dashboard" description="Westgard rules, QC entry, and Levey-Jennings charts are queued for the next build slice." />}
+        />
+        <Route
+          path="validation/queue"
+          element={<PlaceholderPage title="Validation queue" description="Scientific review and critical result acknowledgement workspace will appear here." />}
+        />
+        <Route
+          path="dispatch/queue"
+          element={<PlaceholderPage title="Dispatch queue" description="Report preview, dispatch actions, and amendment history will live here." />}
+        />
+        <Route
+          path="referral/queue"
+          element={<PlaceholderPage title="Referral queue" description="Send-out logging and referral result intake live here." />}
+        />
+        <Route
+          path="billing/dashboard"
+          element={<PlaceholderPage title="Billing dashboard" description="Revenue, outstanding balances, and corporate billing analytics live here." />}
+        />
+        <Route
+          path="billing/outstanding"
+          element={<PlaceholderPage title="Outstanding invoices" description="Ageing buckets and reminder workflows will render here." />}
+        />
+        <Route path="admin/analytics" element={<AdminAnalyticsPage />} />
+        <Route path="admin/users" element={<AdminUsersPage />} />
+        <Route path="admin/settings" element={<AdminSettingsPage />} />
+        <Route path="admin/catalog" element={<AdminCatalogPage />} />
+        <Route path="admin/audit" element={<AdminAuditPage />} />
       </Route>
     </Routes>
   );

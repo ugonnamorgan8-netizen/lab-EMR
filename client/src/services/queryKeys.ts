@@ -6,4 +6,9 @@ export const queryKeys = {
   catalog: () => ["catalog"] as const,
   invoice: (visitId: string) => ["invoice", visitId] as const,
   notifications: () => ["notifications"] as const,
+  adminAnalytics: () => ["admin", "analytics"] as const,
+  adminUsers: () => ["admin", "users"] as const,
+  adminSettings: () => ["admin", "settings"] as const,
+  adminCatalog: () => ["admin", "catalog"] as const,
+  adminAudit: () => ["admin", "audit"] as const,
 };

@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
+import { adminRouter } from "./routes/adminRoutes.js";
 import { config } from "./config.js";
 import { requireAuth } from "./middleware/auth.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -58,6 +59,7 @@ export function createApp() {
   app.use("/api/samples", requireAuth, sampleRouter);
   app.use("/api/invoices", requireAuth, billingRouter);
   app.use("/api/catalog", requireAuth, catalogRouter);
+  app.use("/api/admin", requireAuth, adminRouter);
   app.use("/api/notifications", requireAuth, notificationRouter);
 
   if (hasBuiltClient) {
