@@ -22,6 +22,17 @@ export type UserStatus = z.infer<typeof userStatusSchema>;
 export const urgencySchema = z.enum(["ROUTINE", "URGENT", "STAT"]);
 export type Urgency = z.infer<typeof urgencySchema>;
 
+export const orderStatusSchema = z.enum([
+  "PENDING",
+  "IN_ANALYSIS",
+  "RESULTED",
+  "VALIDATED",
+  "REPORTED",
+  "REFERRED_OUT",
+  "CANCELLED",
+]);
+export type OrderStatus = z.infer<typeof orderStatusSchema>;
+
 export const visitStatusSchema = z.enum([
   "REGISTERED",
   "SAMPLE_COLLECTED",
@@ -143,12 +154,49 @@ export const sampleConditionSchema = z.enum([
 ]);
 export type SampleCondition = z.infer<typeof sampleConditionSchema>;
 
+export const sampleStatusSchema = z.enum([
+  "PENDING_COLLECTION",
+  "COLLECTED",
+  "IN_TRANSIT",
+  "RECEIVED_LAB",
+  "IN_CENTRIFUGE",
+  "ALIQUOTED",
+  "IN_ANALYSIS",
+  "ANALYSIS_COMPLETE",
+  "STORED",
+  "DISPOSED",
+]);
+export type SampleStatus = z.infer<typeof sampleStatusSchema>;
+
 export const collectSampleSchema = z.object({
   collectedAt: z.string(),
   condition: sampleConditionSchema,
   conditionNote: z.string().optional(),
 });
 export type CollectSampleInput = z.infer<typeof collectSampleSchema>;
+
+export const sampleWorkflowUpdateSchema = z.object({
+  status: z.enum(["RECEIVED_LAB", "IN_CENTRIFUGE", "ALIQUOTED", "IN_ANALYSIS", "STORED", "DISPOSED"]),
+});
+export type SampleWorkflowUpdateInput = z.infer<typeof sampleWorkflowUpdateSchema>;
+
+export const processingResultEntrySchema = z.object({
+  method: z.string().trim().optional(),
+  instrument: z.string().trim().optional(),
+  technicianNote: z.string().trim().optional(),
+});
+export type ProcessingResultEntryInput = z.infer<typeof processingResultEntrySchema>;
+
+export const qcEntryCreateSchema = z.object({
+  value: z.number(),
+  note: z.string().trim().optional(),
+});
+export type QcEntryCreateInput = z.infer<typeof qcEntryCreateSchema>;
+
+export const dispatchReportSchema = z.object({
+  deliveryMethod: z.enum(["PRINT", "EMAIL", "SMS", "PORTAL", "WHATSAPP"]).default("PRINT"),
+});
+export type DispatchReportInput = z.infer<typeof dispatchReportSchema>;
 
 export const apiErrorSchema = z.object({
   message: z.string(),

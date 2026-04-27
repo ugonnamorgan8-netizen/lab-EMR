@@ -11,4 +11,11 @@ export const queryKeys = {
   adminSettings: () => ["admin", "settings"] as const,
   adminCatalog: () => ["admin", "catalog"] as const,
   adminAudit: () => ["admin", "audit"] as const,
+  preanalytics: () => ["workflow", "preanalytics"] as const,
+  processing: () => ["workflow", "processing"] as const,
+  validation: () => ["workflow", "validation"] as const,
+  qc: () => ["workflow", "qc"] as const,
+  dispatch: () => ["workflow", "dispatch"] as const,
+  billingDashboard: () => ["workflow", "billing", "dashboard"] as const,
+  billingOutstanding: () => ["workflow", "billing", "outstanding"] as const,
 };

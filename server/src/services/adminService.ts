@@ -1,6 +1,7 @@
 import { OrderStatus, Role, UserStatus } from "@prisma/client";
 import type { AdminCatalogTestUpdateInput, AdminUserUpdateInput, SystemSettingUpdateInput } from "../../../shared/types/index.js";
 import { prisma } from "../lib/prisma.js";
+import { HttpError } from "../utils/httpError.js";
 
 function startOfToday() {
   const value = new Date();
@@ -330,7 +331,7 @@ export async function updateAdminUser(userId: string, payload: AdminUserUpdateIn
       (payload.status !== undefined && payload.status !== currentUser.status));
 
   if (isChangingOwnPrivilege) {
-    throw new Error("You cannot change your own role or status from this screen");
+    throw new HttpError(400, "You cannot change your own role or status from this screen");
   }
 
   const updatedUser = await prisma.user.update({

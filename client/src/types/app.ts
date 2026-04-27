@@ -195,3 +195,209 @@ export type AuditLogItem = {
     role: string;
   };
 };
+
+export type WorkflowSample = {
+  id: string;
+  specimenId: string;
+  specimenType: string;
+  container: string;
+  status: string;
+  collectedAt?: string | null;
+  condition?: string;
+  visit: VisitSummary;
+  testOrders: Array<{
+    id: string;
+    orderId: string;
+    status: string;
+    urgency: string;
+    tatDeadline?: string | null;
+    testCatalog: {
+      id: string;
+      code: string;
+      name: string;
+      department: string;
+      price: number;
+    };
+  }>;
+};
+
+export type ProcessingOrder = {
+  id: string;
+  orderId: string;
+  status: string;
+  urgency: string;
+  tatDeadline?: string | null;
+  orderedAt: string;
+  sample: {
+    id: string;
+    specimenId: string;
+    status: string;
+    visit: {
+      id: string;
+      visitId: string;
+      urgency: string;
+      status: string;
+      registeredAt: string;
+      patient: PatientSummary;
+    };
+  };
+  testCatalog: {
+    id: string;
+    code: string;
+    name: string;
+    department: string;
+    parameters: Array<{
+      id: string;
+      name: string;
+      unit: string;
+      referenceRanges: Array<{
+        id: string;
+        normalLow?: number | null;
+        normalHigh?: number | null;
+        criticalLow?: number | null;
+        criticalHigh?: number | null;
+      }>;
+    }>;
+  };
+  result?: {
+    id: string;
+    status: string;
+    enteredAt?: string | null;
+    values: Array<{
+      id: string;
+      value: string;
+      numericValue?: number | null;
+      flag: string;
+      parameter: {
+        id: string;
+        name: string;
+        unit: string;
+      };
+    }>;
+  } | null;
+};
+
+export type ValidationItem = {
+  id: string;
+  status: string;
+  enteredAt?: string | null;
+  validatedAt?: string | null;
+  values: Array<{
+    id: string;
+    value: string;
+    numericValue?: number | null;
+    flag: string;
+    parameter: {
+      id: string;
+      name: string;
+      unit: string;
+    };
+  }>;
+  testOrder: {
+    id: string;
+    orderId: string;
+    urgency: string;
+    status: string;
+    testCatalog: {
+      id: string;
+      code: string;
+      name: string;
+      department: string;
+    };
+    sample: {
+      id: string;
+      specimenId: string;
+      visit: {
+        id: string;
+        visitId: string;
+        urgency: string;
+        status: string;
+        patient: PatientSummary;
+      };
+    };
+  };
+};
+
+export type QcDashboardResponse = {
+  summary: {
+    activeMaterials: number;
+    warningRuns: number;
+    rejectedRuns: number;
+    expiringSoon: number;
+  };
+  materials: Array<{
+    id: string;
+    name: string;
+    level: string;
+    lotNumber: string;
+    expiryDate: string;
+    targetMean: number;
+    targetSD: number;
+    active: boolean;
+    testCatalog: {
+      id: string;
+      code: string;
+      name: string;
+      department: string;
+    };
+    entries: Array<{
+      id: string;
+      value: number;
+      zScore: number;
+      rule: string;
+      note?: string | null;
+      runDate: string;
+      enteredBy: string;
+    }>;
+  }>;
+};
+
+export type DispatchVisit = VisitSummary & {
+  report?: {
+    id: string;
+    reportId: string;
+    generatedAt?: string | null;
+    dispatchedAt?: string | null;
+    status: string;
+    pdfUrl?: string | null;
+    deliveryMethod?: string[];
+  } | null;
+};
+
+export type BillingDashboardResponse = {
+  summary: {
+    totalInvoices: number;
+    grossRevenue: number;
+    collectedRevenue: number;
+    outstandingBalance: number;
+    unpaidCount: number;
+    partialCount: number;
+  };
+  invoices: Array<{
+    id: string;
+    invoiceId: string;
+    visitId: string;
+    patientName: string;
+    visitRef: string;
+    totalAmount: number;
+    patientBalance: number;
+    status: string;
+    paymentCount: number;
+    createdAt: string;
+    paidAt?: string | null;
+  }>;
+};
+
+export type OutstandingInvoice = {
+  id: string;
+  invoiceId: string;
+  visitId: string;
+  patientName: string;
+  patientPhone: string;
+  visitRef: string;
+  totalAmount: number;
+  patientBalance: number;
+  status: string;
+  paymentCount: number;
+  createdAt: string;
+};

@@ -19,12 +19,12 @@ export function AppShell({
   useSocket();
 
   return (
-    <div className="min-h-screen bg-brand-surface md:flex">
+    <div className="min-h-screen bg-transparent md:flex">
       <Sidebar items={navItems} userLabel={userLabel} />
       <div className="flex min-h-screen flex-1 flex-col pb-16 md:pb-0">
         <Topbar title={title} subtitle={subtitle} onLogout={logout} />
         <PatientContextBanner />
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+        <main className="flex-1 px-4 py-5 md:px-6 md:py-6">{children}</main>
       </div>
       <BottomTabBar items={navItems} />
       <NotificationDrawer />

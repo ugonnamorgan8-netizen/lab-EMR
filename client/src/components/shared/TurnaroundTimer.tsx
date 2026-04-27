@@ -31,8 +31,15 @@ export function TurnaroundTimer({
       const total = Math.max(1, Math.round((deadline - start) / 60000));
       const elapsedPercent = 1 - remaining / total;
       return {
-        label: `${urgency === "STAT" ? "⚡ " : ""}${formatMinutes(remaining)} remaining`,
-        tone: urgency === "STAT" ? "text-brand-red" : elapsedPercent > 0.85 ? "text-brand-red" : elapsedPercent > 0.5 ? "text-brand-amber" : "text-brand-green",
+        label: `${urgency === "STAT" ? "STAT · " : ""}${formatMinutes(remaining)} remaining`,
+        tone:
+          urgency === "STAT"
+            ? "text-brand-red"
+            : elapsedPercent > 0.85
+              ? "text-brand-red"
+              : elapsedPercent > 0.5
+                ? "text-brand-amber"
+                : "text-brand-green",
       };
     }
 

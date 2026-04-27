@@ -14,6 +14,13 @@ import { PatientsPage } from "./modules/reception/PatientsPage";
 import { QueuePage } from "./modules/reception/QueuePage";
 import { RegisterPage } from "./modules/reception/RegisterPage";
 import { PlaceholderPage } from "./modules/shared/PlaceholderPage";
+import { BillingDashboardPage } from "./modules/workflow/BillingDashboardPage";
+import { DispatchQueuePage } from "./modules/workflow/DispatchQueuePage";
+import { OutstandingInvoicesPage } from "./modules/workflow/OutstandingInvoicesPage";
+import { PreanalyticsQueuePage } from "./modules/workflow/PreanalyticsQueuePage";
+import { ProcessingWorklistPage } from "./modules/workflow/ProcessingWorklistPage";
+import { QcDashboardPage } from "./modules/workflow/QcDashboardPage";
+import { ValidationQueuePage } from "./modules/workflow/ValidationQueuePage";
 import { useAuthStore } from "./stores/authStore";
 import { ROLE_PERMISSIONS } from "./utils/rolePermissions";
 
@@ -62,6 +69,7 @@ const navByRole = {
     { label: "Queue", to: "/reception/queue" },
     { label: "QC", to: "/qc/dashboard" },
     { label: "Billing", to: "/billing/dashboard" },
+    { label: "Outstanding", to: "/billing/outstanding" },
     { label: "Users", to: "/admin/users" },
   ],
   ADMIN: [
@@ -76,6 +84,7 @@ const navByRole = {
     { label: "QC", to: "/qc/dashboard" },
     { label: "Dispatch", to: "/dispatch/queue" },
     { label: "Billing", to: "/billing/dashboard" },
+    { label: "Outstanding", to: "/billing/outstanding" },
     { label: "Settings", to: "/admin/settings" },
     { label: "Users", to: "/admin/users" },
     { label: "Catalog", to: "/admin/catalog" },
@@ -138,38 +147,17 @@ export function App() {
         <Route path="collection/queue" element={<CollectionQueuePage />} />
         <Route path="collection/:visitId" element={<CollectionWorkspacePage />} />
         <Route path="billing/invoice/:visitId" element={<InvoicePage />} />
-        <Route
-          path="preanalytics/queue"
-          element={<PlaceholderPage title="Pre-analytics queue" description="Tracking, receive, and centrifuge screens land here next." />}
-        />
-        <Route
-          path="processing/worklist"
-          element={<PlaceholderPage title="Processing worklist" description="Bench analysis, result entry, and delta check workflow will mount here." />}
-        />
-        <Route
-          path="qc/dashboard"
-          element={<PlaceholderPage title="QC dashboard" description="Westgard rules, QC entry, and Levey-Jennings charts are queued for the next build slice." />}
-        />
-        <Route
-          path="validation/queue"
-          element={<PlaceholderPage title="Validation queue" description="Scientific review and critical result acknowledgement workspace will appear here." />}
-        />
-        <Route
-          path="dispatch/queue"
-          element={<PlaceholderPage title="Dispatch queue" description="Report preview, dispatch actions, and amendment history will live here." />}
-        />
+        <Route path="preanalytics/queue" element={<PreanalyticsQueuePage />} />
+        <Route path="processing/worklist" element={<ProcessingWorklistPage />} />
+        <Route path="qc/dashboard" element={<QcDashboardPage />} />
+        <Route path="validation/queue" element={<ValidationQueuePage />} />
+        <Route path="dispatch/queue" element={<DispatchQueuePage />} />
         <Route
           path="referral/queue"
           element={<PlaceholderPage title="Referral queue" description="Send-out logging and referral result intake live here." />}
         />
-        <Route
-          path="billing/dashboard"
-          element={<PlaceholderPage title="Billing dashboard" description="Revenue, outstanding balances, and corporate billing analytics live here." />}
-        />
-        <Route
-          path="billing/outstanding"
-          element={<PlaceholderPage title="Outstanding invoices" description="Ageing buckets and reminder workflows will render here." />}
-        />
+        <Route path="billing/dashboard" element={<BillingDashboardPage />} />
+        <Route path="billing/outstanding" element={<OutstandingInvoicesPage />} />
         <Route path="admin/analytics" element={<AdminAnalyticsPage />} />
         <Route path="admin/users" element={<AdminUsersPage />} />
         <Route path="admin/settings" element={<AdminSettingsPage />} />

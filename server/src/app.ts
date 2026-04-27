@@ -16,6 +16,7 @@ import { notificationRouter } from "./routes/notificationRoutes.js";
 import { patientRouter } from "./routes/patientRoutes.js";
 import { sampleRouter } from "./routes/sampleRoutes.js";
 import { visitRouter } from "./routes/visitRoutes.js";
+import { workflowRouter } from "./routes/workflowRoutes.js";
 
 export function createApp() {
   const app = express();
@@ -60,6 +61,7 @@ export function createApp() {
   app.use("/api/invoices", requireAuth, billingRouter);
   app.use("/api/catalog", requireAuth, catalogRouter);
   app.use("/api/admin", requireAuth, adminRouter);
+  app.use("/api/workflows", requireAuth, workflowRouter);
   app.use("/api/notifications", requireAuth, notificationRouter);
 
   if (hasBuiltClient) {
