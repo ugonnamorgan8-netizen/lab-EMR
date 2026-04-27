@@ -146,13 +146,13 @@ async function main() {
   await prisma.systemSetting.deleteMany();
 
   const passwordHash = await bcrypt.hash("Password123!", 10);
-  const createdUsers = await Promise.all(
-    users.map(([name, email, role, department]) =>
-      prisma.user.create({
-        data: { name, email, role, department, passwordHash },
-      }),
-    ),
-  );
+  const createdUsers = [];
+  for (const [name, email, role, department] of users) {
+    const user = await prisma.user.create({
+      data: { name, email, role, department, passwordHash },
+    });
+    createdUsers.push(user);
+  }
 
   await prisma.systemSetting.createMany({
     data: [
@@ -164,9 +164,11 @@ async function main() {
     ],
   });
 
-  const createdPatients = await Promise.all(
-    patients.map((patient) => prisma.patient.create({ data: patient })),
-  );
+  const createdPatients = [];
+  for (const patient of patients) {
+    const createdPatient = await prisma.patient.create({ data: patient });
+    createdPatients.push(createdPatient);
+  }
 
   for (const catalog of catalogSeed) {
     await prisma.testCatalog.create({
