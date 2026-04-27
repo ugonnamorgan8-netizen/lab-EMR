@@ -21,7 +21,13 @@ export function createApp() {
   const allowedOrigins = new Set(
     [config.clientUrl, "http://localhost:3000", "http://localhost:5173"].filter(Boolean),
   );
-  const clientDistPath = path.resolve(process.cwd(), "client", "dist");
+  const clientDistCandidates = [
+    path.resolve(process.cwd(), "client", "dist"),
+    path.resolve(process.cwd(), "..", "client", "dist"),
+  ];
+  const clientDistPath =
+    clientDistCandidates.find((candidatePath) => fs.existsSync(candidatePath)) ??
+    clientDistCandidates[0];
   const hasBuiltClient = fs.existsSync(clientDistPath);
 
   app.use(
