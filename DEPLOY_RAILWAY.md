@@ -32,7 +32,6 @@ Add these service variables:
 
 - `NODE_ENV=production`
 - `DATABASE_URL=<your pooled postgres URL>`
-- `DIRECT_URL=<your direct postgres URL>`
 - `JWT_ACCESS_SECRET=<long random string>`
 - `JWT_REFRESH_SECRET=<long random string>`
 - `CLIENT_URL=https://<your-public-railway-domain>`
@@ -40,7 +39,7 @@ Add these service variables:
 Notes:
 
 - Railway injects `PORT` automatically, so you should not hardcode it.
-- For Supabase, use the session pooler for `DATABASE_URL` and the direct connection for `DIRECT_URL`.
+- For Supabase on Railway, use the session pooler string for `DATABASE_URL`.
 - The seed script wipes and reseeds the demo database on each deploy.
 
 ## 4. Generate a public domain
