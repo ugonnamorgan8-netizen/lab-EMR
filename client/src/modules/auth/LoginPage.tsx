@@ -21,7 +21,10 @@ export function LoginPage() {
       <Card className="w-full max-w-md p-6">
         <p className="text-sm font-semibold uppercase tracking-wide text-brand-blue">Standalone Lab EMR</p>
         <h1 className="mt-2 text-2xl font-bold text-slate-900">Welcome back</h1>
-        <p className="mt-1 text-sm text-slate-500">Use any seeded user email with the shared password.</p>
+        <div className="mt-1 space-y-1 text-sm text-slate-500">
+          <p>Demo login: admin@labemr.test</p>
+          <p>Password: Password123!</p>
+        </div>
         <form className="mt-6 space-y-4" onSubmit={handleSubmit((values) => login.mutate(values))}>
           <Input label="Email" {...register("email")} error={formState.errors.email?.message} />
           <Input label="Password" type="password" {...register("password")} error={formState.errors.password?.message} />
