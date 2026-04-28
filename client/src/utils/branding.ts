@@ -1,8 +1,12 @@
 export const appBrand = {
-  shortName: "Lab EMR",
-  labName: "Medicare Diagnostic Laboratory",
-  shellTagline: "Reception, science, billing, and supervisory oversight in one polished laboratory workspace.",
-  loginTagline: "Integrated reception, science, billing, and supervisory oversight for daily laboratory operations.",
+  shortName: "St. David",
+  labName: "ST. DAVID MEDICAL DIAGNOSTIC CENTRE",
+  address: "BERLIN PLAZA #NO 110 OGUI ROAD ENUGU STATE NIGERIA",
+  email: "info@stdavidmedicaldiagnostic.org.ng",
+  phone: "08100094967",
+  website: "www.stdavidmedicaldiagnostic.org.ng",
+  shellTagline: "Laboratory operations, reporting, and finance coordinated in one branded diagnostic workspace.",
+  loginTagline: "Trusted diagnostics, streamlined workflow, and patient-ready reporting from a single operations console.",
   logoPath: "/lab-logo.jpeg",
 };
 

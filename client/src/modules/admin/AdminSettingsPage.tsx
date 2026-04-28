@@ -1,16 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { PageHero } from "../../components/shared/PageHero";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { api } from "../../services/api";
 import { queryKeys } from "../../services/queryKeys";
+import { useAuthStore } from "../../stores/authStore";
 import type { AdminSettingsResponse } from "../../types/app";
 import { formatDate } from "../../utils/formatDate";
 
 export function AdminSettingsPage() {
   const queryClient = useQueryClient();
+  const user = useAuthStore((state) => state.user);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const settingsQuery = useQuery({
@@ -43,41 +46,62 @@ export function AdminSettingsPage() {
     return <EmptyState title="Settings unavailable" message="System settings could not be loaded right now." />;
   }
 
+  const isScientistRoute = user?.role === "LAB_SCIENTIST";
+  const labSettings = settingsQuery.data.settings.filter((setting) => setting.key.startsWith("lab."));
+  const visibleSettings = labSettings.length > 0 ? labSettings : settingsQuery.data.settings;
+
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <Card>
-          <p className="text-sm text-slate-500">Users</p>
-          <p className="mt-2 text-2xl font-bold text-slate-900">{settingsQuery.data.footprint.userCount}</p>
-        </Card>
-        <Card>
-          <p className="text-sm text-slate-500">Patients</p>
-          <p className="mt-2 text-2xl font-bold text-slate-900">{settingsQuery.data.footprint.patientCount}</p>
-        </Card>
-        <Card>
-          <p className="text-sm text-slate-500">Catalog tests</p>
-          <p className="mt-2 text-2xl font-bold text-slate-900">{settingsQuery.data.footprint.catalogCount}</p>
-        </Card>
-        <Card>
-          <p className="text-sm text-slate-500">Panels</p>
-          <p className="mt-2 text-2xl font-bold text-slate-900">{settingsQuery.data.footprint.panelCount}</p>
-        </Card>
-        <Card>
-          <p className="text-sm text-slate-500">Audit records</p>
-          <p className="mt-2 text-2xl font-bold text-slate-900">{settingsQuery.data.footprint.auditCount}</p>
-        </Card>
-      </div>
+      <PageHero
+        eyebrow={isScientistRoute ? "Laboratory Configuration" : "System Settings"}
+        title={isScientistRoute ? "Scientist lab configuration" : "Laboratory settings"}
+        description={
+          isScientistRoute
+            ? "Update the laboratory identity used across reports and the application workspace, including branding, contact information, director details, and report labels."
+            : "Control facility branding and report identity from the shared settings store used across the application."
+        }
+        aside={
+          <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm text-slate-100">
+            Settings: {visibleSettings.length}
+          </div>
+        }
+      />
+
+      {!isScientistRoute ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <Card>
+            <p className="text-sm text-slate-500">Users</p>
+            <p className="mt-2 text-2xl font-bold text-slate-900">{settingsQuery.data.footprint.userCount}</p>
+          </Card>
+          <Card>
+            <p className="text-sm text-slate-500">Patients</p>
+            <p className="mt-2 text-2xl font-bold text-slate-900">{settingsQuery.data.footprint.patientCount}</p>
+          </Card>
+          <Card>
+            <p className="text-sm text-slate-500">Catalog tests</p>
+            <p className="mt-2 text-2xl font-bold text-slate-900">{settingsQuery.data.footprint.catalogCount}</p>
+          </Card>
+          <Card>
+            <p className="text-sm text-slate-500">Panels</p>
+            <p className="mt-2 text-2xl font-bold text-slate-900">{settingsQuery.data.footprint.panelCount}</p>
+          </Card>
+          <Card>
+            <p className="text-sm text-slate-500">Audit records</p>
+            <p className="mt-2 text-2xl font-bold text-slate-900">{settingsQuery.data.footprint.auditCount}</p>
+          </Card>
+        </div>
+      ) : null}
 
       <Card className="space-y-4">
         <div>
           <h3 className="text-lg font-semibold text-slate-900">Lab configuration</h3>
-          <p className="text-sm text-slate-500">Supervisor-controlled facility settings live here, including the lab name, tagline, and an optional logo URL override for printed reports and in-app branding.</p>
+          <p className="text-sm text-slate-500">Facility identity, report branding, and contact information live here and feed the printable result output.</p>
         </div>
-        {settingsQuery.data.settings.length === 0 ? (
+        {visibleSettings.length === 0 ? (
           <EmptyState title="No settings found" message="Seeded system settings will appear here." />
         ) : (
           <div className="space-y-3">
-            {settingsQuery.data.settings.map((setting) => {
+            {visibleSettings.map((setting) => {
               const draftValue = drafts[setting.key] ?? setting.value;
               const isDirty = draftValue !== setting.value;
 

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { MetricCard } from "../../components/shared/MetricCard";
 import { PageHero } from "../../components/shared/PageHero";
 import { StatusBadge } from "../../components/shared/StatusBadge";
@@ -13,6 +14,7 @@ import { formatCurrency } from "../../utils/formatCurrency";
 import { formatDate } from "../../utils/formatDate";
 
 export function OutstandingInvoicesPage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const invoices = useQuery({
     queryKey: queryKeys.billingOutstanding(),
@@ -49,16 +51,16 @@ export function OutstandingInvoicesPage() {
   return (
     <div className="space-y-5">
       <PageHero
-        eyebrow="Receivables"
-        title="Outstanding invoices"
-        description="Stay ahead of unpaid and partially paid invoices with a focused receivables board and one-click full settlement for demo workflows."
+        eyebrow="Accounts Desk"
+        title="Payment queue"
+        description="See registered patients waiting for payment confirmation, quote their total, receive funds, and close invoices cleanly at the accounts desk."
         aside={<div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-slate-100">Open balances: {invoices.data.length}</div>}
       />
 
       <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard label="Outstanding invoices" value={invoices.data.length} hint="Accounts still carrying a patient balance" />
+        <MetricCard label="Patients awaiting payment" value={invoices.data.length} hint="Invoices still waiting for full accounts confirmation" />
         <MetricCard label="Outstanding value" value={formatCurrency(outstandingBalance)} hint="Combined receivables still open" />
-        <MetricCard label="Average balance" value={formatCurrency(invoices.data.length ? outstandingBalance / invoices.data.length : 0)} hint="Average amount per outstanding invoice" />
+        <MetricCard label="Average bill" value={formatCurrency(invoices.data.length ? outstandingBalance / invoices.data.length : 0)} hint="Average amount currently presented at the desk" />
       </div>
 
       {invoices.data.length === 0 ? (
@@ -81,11 +83,14 @@ export function OutstandingInvoicesPage() {
                     <p className="text-xs text-slate-500">Balance {formatCurrency(invoice.patientBalance)}</p>
                   </div>
                   <StatusBadge status={invoice.status} />
+                  <Button variant="secondary" onClick={() => navigate(`/billing/invoice/${invoice.visitId}`)}>
+                    Open invoice
+                  </Button>
                   <Button
                     disabled={settleInvoice.isPending}
                     onClick={() => settleInvoice.mutate({ visitId: invoice.visitId, amount: invoice.patientBalance })}
                   >
-                    Record full payment
+                    Confirm full payment
                   </Button>
                 </div>
               </div>

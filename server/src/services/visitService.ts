@@ -153,7 +153,13 @@ export async function listVisits(filters: { date?: string; status?: string; urge
     include: {
       patient: true,
       samples: {
-        include: { testOrders: true },
+        include: {
+          testOrders: {
+            include: {
+              testCatalog: true,
+            },
+          },
+        },
       },
       invoice: true,
       report: true,

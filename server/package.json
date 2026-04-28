@@ -10,6 +10,7 @@
     "prisma:generate": "prisma generate",
     "prisma:prepare-roles": "prisma db execute --file prisma/normalize-legacy-roles.sql --schema prisma/schema.prisma",
     "prisma:push": "npm run prisma:prepare-roles && prisma db push --accept-data-loss",
+    "seed:maybe": "tsx prisma/maybeSeed.ts",
     "seed": "tsx prisma/seed.ts",
     "test": "vitest run --pool=threads",
     "lint": "tsc --noEmit"

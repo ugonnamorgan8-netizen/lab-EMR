@@ -15,7 +15,7 @@
   },
   "deploy": {
     "startCommand": "npm run start",
-    "preDeployCommand": "npm run prisma:push --workspace server && npm run seed --workspace server",
+    "preDeployCommand": "npm run prisma:push --workspace server && npm run seed:maybe --workspace server",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",

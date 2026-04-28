@@ -1240,6 +1240,8 @@ export async function getVisitResults(visitId: string) {
             "lab.name",
             "lab.address",
             "lab.phone",
+            "lab.email",
+            "lab.website",
             "lab.director",
             "lab.accreditation",
             "lab.tagline",
@@ -1255,9 +1257,11 @@ export async function getVisitResults(visitId: string) {
 
   return {
     lab: {
-      name: settingsMap["lab.name"] ?? "Diagnostic Laboratory",
+      name: settingsMap["lab.name"] ?? "ST. DAVID MEDICAL DIAGNOSTIC CENTRE",
       address: settingsMap["lab.address"] ?? "",
       phone: settingsMap["lab.phone"] ?? "",
+      email: settingsMap["lab.email"] ?? "",
+      website: settingsMap["lab.website"] ?? "",
       director: settingsMap["lab.director"] ?? "",
       accreditation: settingsMap["lab.accreditation"] ?? "",
       tagline: settingsMap["lab.tagline"] ?? "",

@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@shared/index";
 import { useAuth } from "../../hooks/useAuth";
+import { BrandLogo } from "../../components/brand/BrandLogo";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { Input } from "../../components/ui/Input";
@@ -12,29 +13,25 @@ export function LoginPage() {
   const { register, handleSubmit, formState } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "reception@labemr.test",
-      password: "Password123!",
+      email: "",
+      password: "",
     },
   });
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-brand-surface p-4">
       <Card className="w-full max-w-md p-6">
-        <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-[linear-gradient(135deg,rgba(15,47,88,0.08),rgba(15,94,168,0.16))] shadow-[0_16px_32px_rgba(15,47,88,0.1)]">
-            <img src={appBrand.logoPath} alt={appBrand.labName} className="h-12 w-12 object-contain" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-brand-blue">{appBrand.labName}</p>
-            <p className="mt-1 text-sm text-slate-500">{appBrand.loginTagline}</p>
+        <div className="flex flex-col items-center text-center">
+          <BrandLogo src={appBrand.logoPath} alt={appBrand.labName} size="lg" />
+          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-brand-blue">{appBrand.labName}</p>
+          <p className="mt-2 text-sm text-slate-500">{appBrand.loginTagline}</p>
+          <div className="mt-3 space-y-1 text-xs leading-5 text-slate-500">
+            <p>{appBrand.address}</p>
+            <p>{appBrand.email} / {appBrand.phone}</p>
+            <p>{appBrand.website}</p>
           </div>
         </div>
-        <h1 className="mt-2 text-2xl font-bold text-slate-900">Welcome back</h1>
-        <div className="mt-1 space-y-1 text-sm text-slate-500">
-          <p>Supervisor demo: supervisor@labemr.test</p>
-          <p>Scientist demo: scientist@labemr.test</p>
-          <p>Password: Password123!</p>
-        </div>
+        <h1 className="mt-4 text-2xl font-bold text-slate-900">Welcome back</h1>
         <form className="mt-6 space-y-4" onSubmit={handleSubmit((values) => login.mutate(values))}>
           <Input label="Email" {...register("email")} error={formState.errors.email?.message} />
           <Input label="Password" type="password" {...register("password")} error={formState.errors.password?.message} />

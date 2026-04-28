@@ -70,7 +70,7 @@ export function InvoicePage() {
           </div>
         </div>
         <Button fullWidth disabled={invoice.data.patientBalance === 0 || recordPayment.isPending} onClick={() => recordPayment.mutate()}>
-          {recordPayment.isPending ? "Recording payment..." : "Record full payment"}
+          {recordPayment.isPending ? "Confirming payment..." : "Confirm full payment"}
         </Button>
       </Card>
     </div>

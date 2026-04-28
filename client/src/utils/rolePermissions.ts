@@ -1,8 +1,8 @@
 import type { Role } from "@shared/index";
 
 export const ROLE_PERMISSIONS: Record<Role, string[]> = {
-  RECEPTIONIST: ["/reception/register", "/reception/new-visit", "/reception/queue", "/reception/patients", "/billing/invoice", "/reports/visit"],
-  ACCOUNTS: ["/billing/dashboard", "/billing/outstanding", "/billing/invoice", "/reception/patients", "/reports/visit"],
-  LAB_SCIENTIST: ["/collection/queue", "/collection/", "/preanalytics/queue", "/processing/worklist", "/validation/queue", "/qc/dashboard", "/dispatch/queue", "/reception/patients", "/reports/visit"],
+  RECEPTIONIST: ["/reception/register", "/reception/new-visit"],
+  ACCOUNTS: ["/billing/dashboard", "/billing/outstanding", "/billing/invoice", "/reception/patients"],
+  LAB_SCIENTIST: ["/collection/queue", "/collection/", "/preanalytics/queue", "/processing/worklist", "/catalog/setup", "/lab/configuration", "/validation/queue", "/qc/dashboard", "/dispatch/queue", "/reception/patients", "/reports/visit"],
   SUPERVISOR: ["*"],
 };

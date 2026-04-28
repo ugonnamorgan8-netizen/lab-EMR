@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
+import { BrandLogo } from "../../components/brand/BrandLogo";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { EmptyState } from "../../components/ui/EmptyState";
@@ -96,7 +97,7 @@ export function ResultReportPage() {
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-4">
               {logoUrl ? (
-                <img src={logoUrl} alt={lab.name} className="h-16 w-16 rounded-2xl bg-white/92 object-contain p-1.5 shadow-[0_12px_24px_rgba(15,47,88,0.12)]" />
+                <BrandLogo src={logoUrl} alt={lab.name} size="md" className="bg-white/96" imageClassName="h-11 w-11" />
               ) : (
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/18 text-xl font-bold tracking-[0.2em]">
                   {initials}
@@ -111,6 +112,8 @@ export function ResultReportPage() {
             <div className="space-y-1 text-sm text-sky-100 md:text-right">
               {lab.address ? <p>{lab.address}</p> : null}
               {lab.phone ? <p>{lab.phone}</p> : null}
+              {lab.email ? <p>{lab.email}</p> : null}
+              {lab.website ? <p>{lab.website}</p> : null}
               {lab.accreditation ? <p>{lab.accreditation}</p> : null}
             </div>
           </div>

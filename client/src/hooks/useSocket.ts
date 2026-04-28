@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { io } from "socket.io-client";
 import { useAuthStore } from "../stores/authStore";
 import { useNotificationStore } from "../stores/notificationStore";
+import { usePresenceStore } from "../stores/presenceStore";
 
 const socketUrl =
   import.meta.env.VITE_SOCKET_URL ??
@@ -12,10 +13,13 @@ const socket = io(socketUrl, { autoConnect: false, withCredentials: true });
 export function useSocket() {
   const user = useAuthStore((state) => state.user);
   const pushItem = useNotificationStore((state) => state.pushItem);
+  const setActiveUsers = usePresenceStore((state) => state.setActiveUsers);
+  const resetPresence = usePresenceStore((state) => state.reset);
 
   useEffect(() => {
     if (!user) {
       socket.disconnect();
+      resetPresence();
       return;
     }
 
@@ -29,9 +33,13 @@ export function useSocket() {
     socket.on("notification:new", (event) => {
       pushItem(event.notification);
     });
+    socket.on("presence:update", (event: { activeUsers: number }) => {
+      setActiveUsers(event.activeUsers);
+    });
 
     return () => {
       socket.off("notification:new");
+      socket.off("presence:update");
     };
-  }, [pushItem, user]);
+  }, [pushItem, resetPresence, setActiveUsers, user]);
 }

@@ -1,8 +1,9 @@
 import bcrypt from "bcryptjs";
 import dayjs from "dayjs";
 import { PrismaClient, Role, SampleStatus, Urgency, VisitStatus } from "@prisma/client";
+import { pathToFileURL } from "node:url";
 
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 
 const users = [
   ["Reception User", "reception@labemr.test", Role.RECEPTIONIST, "Reception"],
@@ -116,7 +117,7 @@ const catalogSeed = [
   },
 ] as const;
 
-async function main() {
+export async function seedDemoData() {
   await prisma.auditLog.deleteMany();
   await prisma.notification.deleteMany();
   await prisma.payment.deleteMany();
@@ -151,9 +152,11 @@ async function main() {
 
   await prisma.systemSetting.createMany({
     data: [
-      { key: "lab.name", value: "Medicare Diagnostic Laboratory" },
-      { key: "lab.address", value: "12 Medical Drive, Ikeja, Lagos" },
-      { key: "lab.phone", value: "+234 800 000 0000" },
+      { key: "lab.name", value: "ST. DAVID MEDICAL DIAGNOSTIC CENTRE" },
+      { key: "lab.address", value: "BERLIN PLAZA #NO 110 OGUI ROAD ENUGU STATE NIGERIA" },
+      { key: "lab.phone", value: "08100094967" },
+      { key: "lab.email", value: "info@stdavidmedicaldiagnostic.org.ng" },
+      { key: "lab.website", value: "www.stdavidmedicaldiagnostic.org.ng" },
       { key: "lab.director", value: "Dr. Ifeoma Balogun, FMCPath" },
       { key: "lab.accreditation", value: "MLSCN-ACC-2026-014" },
       { key: "lab.tagline", value: "Excellence in Diagnostic Services" },
@@ -433,11 +436,13 @@ async function main() {
   console.log("Seed completed");
 }
 
-main()
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  seedDemoData()
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}

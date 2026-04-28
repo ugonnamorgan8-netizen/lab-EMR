@@ -104,6 +104,27 @@ export const adminUserUpdateSchema = z
   });
 export type AdminUserUpdateInput = z.infer<typeof adminUserUpdateSchema>;
 
+export const adminUserCreateSchema = z.object({
+  name: z.string().trim().min(2, "Name is required"),
+  email: z.string().trim().email("Valid email is required"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[a-z]/, "Password must include a lowercase letter")
+    .regex(/[A-Z]/, "Password must include an uppercase letter")
+    .regex(/[0-9]/, "Password must include a number")
+    .regex(/[^A-Za-z0-9]/, "Password must include a symbol"),
+  role: roleSchema,
+  status: userStatusSchema.default("ACTIVE"),
+  department: z.string().trim().optional().or(z.literal("")),
+});
+export type AdminUserCreateInput = z.infer<typeof adminUserCreateSchema>;
+
+export const adminUserDeleteSchema = z.object({
+  preserveData: z.boolean().default(true),
+});
+export type AdminUserDeleteInput = z.infer<typeof adminUserDeleteSchema>;
+
 export const systemSettingUpdateSchema = z.object({
   value: z.string(),
 });
@@ -119,6 +140,25 @@ export const adminCatalogTestUpdateSchema = z
     message: "Provide at least one field to update",
   });
 export type AdminCatalogTestUpdateInput = z.infer<typeof adminCatalogTestUpdateSchema>;
+
+export const adminCatalogParameterSchema = z.object({
+  name: z.string().trim().min(1, "Analyte name is required"),
+  unit: z.string().trim().min(1, "Unit is required"),
+  sortOrder: z.number().int().nonnegative().default(0),
+});
+export type AdminCatalogParameterInput = z.infer<typeof adminCatalogParameterSchema>;
+
+export const adminCatalogReferenceRangeSchema = z.object({
+  gender: z.string().trim().optional(),
+  ageMinYears: z.number().int().nonnegative().optional(),
+  ageMaxYears: z.number().int().nonnegative().optional(),
+  normalLow: z.number().optional(),
+  normalHigh: z.number().optional(),
+  criticalLow: z.number().optional(),
+  criticalHigh: z.number().optional(),
+  unit: z.string().trim().min(1, "Reference range unit is required"),
+});
+export type AdminCatalogReferenceRangeInput = z.infer<typeof adminCatalogReferenceRangeSchema>;
 
 export const paymentMethodSchema = z.enum([
   "CASH",

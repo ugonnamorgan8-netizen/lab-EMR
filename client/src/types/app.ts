@@ -108,6 +108,17 @@ export type AdminAnalytics = {
   }>;
 };
 
+export type AdminUserRecord = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  department: string | null;
+  status: string;
+  lastLogin: string | null;
+  createdAt: string;
+};
+
 export type AdminUsersResponse = {
   totals: {
     total: number;
@@ -116,7 +127,12 @@ export type AdminUsersResponse = {
     suspended: number;
   };
   byRole: Record<string, number>;
-  users: Array<{
+  users: AdminUserRecord[];
+};
+
+export type DeletedUserArchive = {
+  exportedAt: string;
+  user: {
     id: string;
     name: string;
     email: string;
@@ -125,7 +141,50 @@ export type AdminUsersResponse = {
     status: string;
     lastLogin: string | null;
     createdAt: string;
-  }>;
+  };
+  summary: {
+    collectedSamples: number;
+    validatedResults: number;
+    dispatchedReports: number;
+    qcEntries: number;
+    auditLogs: number;
+  };
+  recentActivity: {
+    collectedSamples: Array<{
+      id: string;
+      specimenId: string;
+      collectedAt: string | null;
+    }>;
+    validatedResults: Array<{
+      id: string;
+      testOrderId: string;
+      validatedAt: string | null;
+    }>;
+    dispatchedReports: Array<{
+      id: string;
+      reportId: string;
+      dispatchedAt: string | null;
+    }>;
+    qcEntries: Array<{
+      id: string;
+      value: number;
+      rule: string;
+      runDate: string;
+    }>;
+    auditLogs: Array<{
+      id: string;
+      action: string;
+      resourceType: string;
+      resourceId: string;
+      createdAt: string;
+    }>;
+  };
+};
+
+export type DeleteAdminUserResponse = {
+  deletedUserId: string;
+  preserved: boolean;
+  archive: DeletedUserArchive | null;
 };
 
 export type AdminSettingsResponse = {
@@ -164,6 +223,23 @@ export type AdminCatalogResponse = {
     sampleVolume: number;
     parameterCount: number;
     referenceRangeCount: number;
+    parameters: Array<{
+      id: string;
+      name: string;
+      unit: string;
+      sortOrder: number;
+      referenceRanges: Array<{
+        id: string;
+        gender?: string | null;
+        ageMinYears?: number | null;
+        ageMaxYears?: number | null;
+        normalLow?: number | null;
+        normalHigh?: number | null;
+        criticalLow?: number | null;
+        criticalHigh?: number | null;
+        unit: string;
+      }>;
+    }>;
   }>;
   panels: Array<{
     id: string;
@@ -412,6 +488,8 @@ export type ResultReportResponse = {
     name: string;
     address: string;
     phone: string;
+    email: string;
+    website: string;
     director: string;
     accreditation: string;
     tagline: string;

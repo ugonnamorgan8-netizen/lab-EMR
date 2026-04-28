@@ -24,25 +24,25 @@ import { ResultReportPage } from "./modules/workflow/ResultReportPage";
 import { ValidationQueuePage } from "./modules/workflow/ValidationQueuePage";
 import { useAuthStore } from "./stores/authStore";
 import type { NavItem, Role } from "./types/app";
+import { appBrand } from "./utils/branding";
 import { ROLE_PERMISSIONS } from "./utils/rolePermissions";
 
 const navByRole: Record<Role, NavItem[]> = {
   RECEPTIONIST: [
     { label: "Register", to: "/reception/register" },
     { label: "New Visit", to: "/reception/new-visit" },
-    { label: "Queue", to: "/reception/queue" },
-    { label: "Patients", to: "/reception/patients" },
-    { label: "Billing", to: "/billing/invoice/demo" },
   ],
   ACCOUNTS: [
-    { label: "Billing", to: "/billing/dashboard" },
-    { label: "Outstanding", to: "/billing/outstanding" },
+    { label: "Payments", to: "/billing/outstanding" },
+    { label: "Dashboard", to: "/billing/dashboard" },
     { label: "Patients", to: "/reception/patients" },
   ],
   LAB_SCIENTIST: [
     { label: "Collection", to: "/collection/queue" },
     { label: "Pre-analytics", to: "/preanalytics/queue" },
     { label: "Processing", to: "/processing/worklist" },
+    { label: "Test Setup", to: "/catalog/setup" },
+    { label: "Lab Config", to: "/lab/configuration" },
     { label: "Validation", to: "/validation/queue" },
     { label: "QC", to: "/qc/dashboard" },
     { label: "Dispatch", to: "/dispatch/queue" },
@@ -88,10 +88,11 @@ function ProtectedLayout() {
 
   return (
     <AppShell
-      title="Diagnostic Laboratory Workspace"
+      title="Laboratory Operations Workspace"
       subtitle={user.role.replaceAll("_", " ")}
       navItems={navItems}
-      userLabel={`${user.name} - ${user.role.replaceAll("_", " ")}`}
+      userName={user.name}
+      userRole={user.role.replaceAll("_", " ")}
     >
       <Outlet />
     </AppShell>
@@ -109,6 +110,8 @@ function HomeRedirect() {
 }
 
 export function App() {
+  document.title = appBrand.labName;
+
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
@@ -123,6 +126,8 @@ export function App() {
         <Route path="billing/invoice/:visitId" element={<InvoicePage />} />
         <Route path="preanalytics/queue" element={<PreanalyticsQueuePage />} />
         <Route path="processing/worklist" element={<ProcessingWorklistPage />} />
+        <Route path="catalog/setup" element={<AdminCatalogPage />} />
+        <Route path="lab/configuration" element={<AdminSettingsPage />} />
         <Route path="qc/dashboard" element={<QcDashboardPage />} />
         <Route path="validation/queue" element={<ValidationQueuePage />} />
         <Route path="dispatch/queue" element={<DispatchQueuePage />} />

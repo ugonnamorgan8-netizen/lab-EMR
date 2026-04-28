@@ -8,7 +8,7 @@ function setRefreshCookie(response: Response, refreshToken: string) {
   response.cookie(config.refreshCookieName, refreshToken, {
     httpOnly: true,
     sameSite: "lax",
-    secure: false,
+    secure: config.isProduction,
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 }

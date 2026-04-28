@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   patientRegistrationSchema,
   type PatientRegistrationFormInput,
@@ -17,6 +17,7 @@ import { queryKeys } from "../../services/queryKeys";
 
 export function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { register, handleSubmit, watch, setValue, formState } = useForm<
     PatientRegistrationFormInput,
     unknown,
@@ -55,6 +56,9 @@ export function RegisterPage() {
           <h3 className="text-lg font-semibold text-slate-900">Patient registration</h3>
           <p className="text-sm text-slate-500">Search first, then create a fresh patient record only if none exists.</p>
         </div>
+        {location.state && "notice" in location.state && typeof location.state.notice === "string" ? (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{location.state.notice}</div>
+        ) : null}
         <form
           className="grid gap-4 md:grid-cols-2"
           onSubmit={handleSubmit((values) =>

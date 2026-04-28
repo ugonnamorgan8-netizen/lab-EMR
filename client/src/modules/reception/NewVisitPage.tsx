@@ -43,7 +43,11 @@ export function NewVisitPage() {
       return response.data;
     },
     onSuccess: (visit) => {
-      navigate(`/billing/invoice/${visit.id}`);
+      navigate("/reception/register", {
+        state: {
+          notice: `Visit ${visit.visitId} created. The accounts desk can now confirm payment for the generated invoice.`,
+        },
+      });
     },
   });
 
@@ -68,7 +72,7 @@ export function NewVisitPage() {
       <Card className="space-y-4">
         <div>
           <h3 className="text-lg font-semibold text-slate-900">New visit and test ordering</h3>
-          <p className="text-sm text-slate-500">Select the visit type, urgency, and the tests to generate grouped samples and an invoice.</p>
+          <p className="text-sm text-slate-500">Select the visit type, urgency, and tests. Once saved, the invoice moves to accounts for payment confirmation.</p>
         </div>
         {patient.data ? (
           <div className="rounded-xl border border-brand-border bg-brand-surface p-4 text-sm text-slate-700">
@@ -135,7 +139,7 @@ export function NewVisitPage() {
       <Card className="space-y-4">
         <div>
           <h3 className="text-lg font-semibold text-slate-900">Selected tests</h3>
-          <p className="text-sm text-slate-500">This drawer becomes the mobile order review bar and drives invoice generation.</p>
+          <p className="text-sm text-slate-500">This review panel confirms what will be priced at the accounts desk.</p>
         </div>
         <div className="space-y-3">
           {selectedCatalog.map((item: { id: string; name: string; price: number }) => (
@@ -164,7 +168,7 @@ export function NewVisitPage() {
             })
           }
         >
-          {createVisit.isPending ? "Generating..." : "Confirm and generate invoice"}
+          {createVisit.isPending ? "Generating..." : "Save visit and hand over to accounts"}
         </Button>
       </Card>
     </div>
