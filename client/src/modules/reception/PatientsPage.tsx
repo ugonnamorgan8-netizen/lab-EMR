@@ -7,26 +7,23 @@ import { Skeleton } from "../../components/ui/Skeleton";
 import { api } from "../../services/api";
 import { queryKeys } from "../../services/queryKeys";
 
-type PatientVisitRecord = {
+type DirectoryPatient = {
   id: string;
-  patient: {
-    id: string;
-    patientId: string;
-    firstName: string;
-    lastName: string;
-    phone: string;
-    gender: string;
-    referringDoctor?: string | null;
-    clinicalHistory?: string | null;
-  };
+  patientId: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  gender: string;
+  referringDoctor?: string | null;
+  clinicalHistory?: string | null;
 };
 
 export function PatientsPage() {
   const patients = useQuery({
-    queryKey: queryKeys.patientsSearch(""),
+    queryKey: queryKeys.patients(),
     queryFn: async () => {
-      const response = await api.get("/visits");
-      return response.data as PatientVisitRecord[];
+      const response = await api.get("/patients");
+      return response.data as DirectoryPatient[];
     },
   });
 
@@ -38,9 +35,7 @@ export function PatientsPage() {
     return <EmptyState title="No patient history yet" message="Patient activity will appear here once visits are created." />;
   }
 
-  const uniquePatients = Array.from(
-    new Map(patients.data.map((visit) => [visit.patient.id, visit.patient])).values(),
-  );
+  const uniquePatients = patients.data;
 
   return (
     <div className="space-y-5">
@@ -52,7 +47,7 @@ export function PatientsPage() {
       />
 
       <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard label="Registered patients" value={uniquePatients.length} hint="Distinct patient records already linked to visits" />
+        <MetricCard label="Registered patients" value={uniquePatients.length} hint="Distinct patient records already captured by reception" />
         <MetricCard label="Female patients" value={uniquePatients.filter((patient) => patient.gender === "Female").length} hint="Current female registry count" />
         <MetricCard label="Male patients" value={uniquePatients.filter((patient) => patient.gender === "Male").length} hint="Current male registry count" />
       </div>
@@ -61,7 +56,7 @@ export function PatientsPage() {
         {uniquePatients.map((patient) => (
           <Card key={patient.id} className="space-y-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">{patient.patientId}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Lab no: {patient.patientId}</p>
               <h3 className="mt-2 text-xl font-semibold text-slate-900">
                 {patient.firstName} {patient.lastName}
               </h3>

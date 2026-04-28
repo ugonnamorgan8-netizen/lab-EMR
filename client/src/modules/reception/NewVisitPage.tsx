@@ -58,8 +58,11 @@ export function NewVisitPage() {
     }
 
     return items.filter(
-      (item: { code: string; name: string }) =>
-        item.code.toLowerCase().includes(search.toLowerCase()) || item.name.toLowerCase().includes(search.toLowerCase()),
+      (item: { code: string; name: string; department: string; category?: string }) =>
+        item.code.toLowerCase().includes(search.toLowerCase()) ||
+        item.name.toLowerCase().includes(search.toLowerCase()) ||
+        item.department.toLowerCase().includes(search.toLowerCase()) ||
+        item.category?.toLowerCase().includes(search.toLowerCase()),
     );
   }, [catalog.data, search]);
 
@@ -76,7 +79,7 @@ export function NewVisitPage() {
         </div>
         {patient.data ? (
           <div className="rounded-xl border border-brand-border bg-brand-surface p-4 text-sm text-slate-700">
-            {patient.data.firstName} {patient.data.lastName} • {patient.data.patientId}
+            {patient.data.firstName} {patient.data.lastName} • Lab no: {patient.data.patientId}
           </div>
         ) : null}
         <div className="grid gap-4 md:grid-cols-3">
@@ -97,7 +100,12 @@ export function NewVisitPage() {
               <option value="STAT">STAT</option>
             </select>
           </label>
-          <Input label="Search tests" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="FBC, LFT, GLU..." />
+          <Input
+            label="Search tests"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search by code, name, or department"
+          />
         </div>
         <label className="flex flex-col gap-2 text-sm">
           <span className="font-medium text-slate-700">Clinical history</span>
@@ -139,7 +147,7 @@ export function NewVisitPage() {
       <Card className="space-y-4">
         <div>
           <h3 className="text-lg font-semibold text-slate-900">Selected tests</h3>
-          <p className="text-sm text-slate-500">This review panel confirms what will be priced at the accounts desk.</p>
+          <p className="text-sm text-slate-500">This review panel confirms what will be priced at the accounts desk and then appear in the scientist workflow.</p>
         </div>
         <div className="space-y-3">
           {selectedCatalog.map((item: { id: string; name: string; price: number }) => (
@@ -170,6 +178,9 @@ export function NewVisitPage() {
         >
           {createVisit.isPending ? "Generating..." : "Save visit and hand over to accounts"}
         </Button>
+        <p className="text-xs text-slate-500">
+          Saving the visit makes the patient visible to the scientist workflow. Accounts confirmation does not block the collection queue in the current system.
+        </p>
       </Card>
     </div>
   );

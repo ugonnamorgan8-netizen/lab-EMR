@@ -1,10 +1,15 @@
 import type { Request, Response } from "express";
 import { patientRegistrationSchema } from "../../../shared/types/index.js";
-import { createPatient, getPatientById, searchPatients } from "../services/patientService.js";
+import { createPatient, getPatientById, listPatients, searchPatients } from "../services/patientService.js";
 
 export async function searchPatientsHandler(request: Request, response: Response) {
   const query = String(request.query.q ?? "");
   const patients = query ? await searchPatients(query) : [];
+  return response.json(patients);
+}
+
+export async function listPatientsHandler(_request: Request, response: Response) {
+  const patients = await listPatients();
   return response.json(patients);
 }
 

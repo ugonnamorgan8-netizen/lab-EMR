@@ -33,8 +33,8 @@ const navByRole: Record<Role, NavItem[]> = {
     { label: "New Visit", to: "/reception/new-visit" },
   ],
   ACCOUNTS: [
-    { label: "Payments", to: "/billing/outstanding" },
     { label: "Dashboard", to: "/billing/dashboard" },
+    { label: "Payments", to: "/billing/outstanding" },
     { label: "Patients", to: "/reception/patients" },
   ],
   LAB_SCIENTIST: [
@@ -64,6 +64,13 @@ const navByRole: Record<Role, NavItem[]> = {
     { label: "Catalog", to: "/admin/catalog" },
     { label: "Audit", to: "/admin/audit" },
   ],
+};
+
+const homeByRole: Record<Role, string> = {
+  RECEPTIONIST: "/reception/register",
+  ACCOUNTS: "/billing/dashboard",
+  LAB_SCIENTIST: "/collection/queue",
+  SUPERVISOR: "/admin/analytics",
 };
 
 function ProtectedLayout() {
@@ -105,7 +112,7 @@ function HomeRedirect() {
     return <Navigate to="/login" replace />;
   }
 
-  const firstAllowed = navByRole[user.role][0]?.to ?? "/reception/register";
+  const firstAllowed = homeByRole[user.role] ?? navByRole[user.role][0]?.to ?? "/reception/register";
   return <Navigate to={firstAllowed} replace />;
 }
 

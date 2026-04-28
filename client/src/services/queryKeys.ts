@@ -1,4 +1,5 @@
 export const queryKeys = {
+  patients: () => ["patients"] as const,
   patientsSearch: (query: string) => ["patients", "search", query] as const,
   patient: (id: string) => ["patients", id] as const,
   visits: (filters?: Record<string, string | undefined>) => ["visits", filters] as const,

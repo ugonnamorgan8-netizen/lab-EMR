@@ -40,6 +40,7 @@ export const visitStatusSchema = z.enum([
 export type VisitStatus = z.infer<typeof visitStatusSchema>;
 
 export const patientRegistrationSchema = z.object({
+  laboratoryNumber: z.string().trim().min(1, "Laboratory number is required"),
   firstName: z.string().trim().min(1, "First name is required"),
   lastName: z.string().trim().min(1, "Last name is required"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),

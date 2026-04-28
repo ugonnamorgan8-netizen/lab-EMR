@@ -68,6 +68,7 @@ export function RegisterPage() {
             }),
           )}
         >
+          <Input label="Laboratory number" {...register("laboratoryNumber")} error={formState.errors.laboratoryNumber?.message} />
           <Input label="First name" {...register("firstName")} error={formState.errors.firstName?.message} />
           <Input label="Last name" {...register("lastName")} error={formState.errors.lastName?.message} />
           <Input label="Date of birth" type="date" {...register("dateOfBirth")} error={formState.errors.dateOfBirth?.message} />
@@ -133,7 +134,7 @@ export function RegisterPage() {
                 {patient.firstName} {patient.lastName}
               </p>
               <p className="text-sm text-slate-600">
-                {patient.patientId} • {patient.phone}
+                Lab no: {patient.patientId} • {patient.phone}
               </p>
             </button>
           ))}

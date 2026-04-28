@@ -1,5 +1,4 @@
 import { prisma } from "../lib/prisma.js";
-import { buildDailyIdentifier } from "../utils/ids.js";
 import type { PatientRegistrationInput } from "../../../shared/types/index.js";
 
 export async function searchPatients(query: string) {
@@ -24,22 +23,22 @@ export async function searchPatients(query: string) {
 }
 
 export async function createPatient(input: PatientRegistrationInput) {
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-
-  const count = await prisma.patient.count({
-    where: {
-      createdAt: { gte: todayStart },
-    },
-  });
+  const { laboratoryNumber, ...rest } = input;
 
   return prisma.patient.create({
     data: {
-      ...input,
-      email: input.email || null,
-      patientId: buildDailyIdentifier("PAT", count),
-      dateOfBirth: new Date(input.dateOfBirth),
+      ...rest,
+      email: rest.email || null,
+      patientId: laboratoryNumber.trim(),
+      dateOfBirth: new Date(rest.dateOfBirth),
     },
+  });
+}
+
+export async function listPatients() {
+  return prisma.patient.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 200,
   });
 }
 
