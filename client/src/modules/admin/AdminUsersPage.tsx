@@ -88,7 +88,7 @@ export function AdminUsersPage() {
       <Card className="space-y-4">
         <div>
           <h3 className="text-lg font-semibold text-slate-900">User directory</h3>
-          <p className="text-sm text-slate-500">Admins can adjust roles, statuses, and departmental placement here.</p>
+          <p className="text-sm text-slate-500">Supervisors can adjust roles, statuses, and departmental placement here.</p>
         </div>
         {usersQuery.data.users.length === 0 ? (
           <EmptyState title="No users found" message="Seeded or created users will appear here." />

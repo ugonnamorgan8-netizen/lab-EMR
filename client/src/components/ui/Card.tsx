@@ -5,7 +5,7 @@ export function Card({ children, className }: PropsWithChildren<{ className?: st
   return (
     <div
       className={cn(
-        "rounded-[26px] border border-white/70 bg-white/90 p-5 shadow-panel backdrop-blur-sm",
+        "rounded-[26px] border border-white/75 bg-white/92 p-5 shadow-panel backdrop-blur-sm",
         className,
       )}
     >

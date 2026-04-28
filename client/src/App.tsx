@@ -20,11 +20,13 @@ import { OutstandingInvoicesPage } from "./modules/workflow/OutstandingInvoicesP
 import { PreanalyticsQueuePage } from "./modules/workflow/PreanalyticsQueuePage";
 import { ProcessingWorklistPage } from "./modules/workflow/ProcessingWorklistPage";
 import { QcDashboardPage } from "./modules/workflow/QcDashboardPage";
+import { ResultReportPage } from "./modules/workflow/ResultReportPage";
 import { ValidationQueuePage } from "./modules/workflow/ValidationQueuePage";
 import { useAuthStore } from "./stores/authStore";
+import type { NavItem, Role } from "./types/app";
 import { ROLE_PERMISSIONS } from "./utils/rolePermissions";
 
-const navByRole = {
+const navByRole: Record<Role, NavItem[]> = {
   RECEPTIONIST: [
     { label: "Register", to: "/reception/register" },
     { label: "New Visit", to: "/reception/new-visit" },
@@ -32,65 +34,37 @@ const navByRole = {
     { label: "Patients", to: "/reception/patients" },
     { label: "Billing", to: "/billing/invoice/demo" },
   ],
-  PHLEBOTOMIST: [
-    { label: "Collect", to: "/collection/queue" },
-    { label: "Queue", to: "/reception/queue" },
-    { label: "Pre-analytics", to: "/preanalytics/queue" },
+  ACCOUNTS: [
+    { label: "Billing", to: "/billing/dashboard" },
+    { label: "Outstanding", to: "/billing/outstanding" },
     { label: "Patients", to: "/reception/patients" },
   ],
   LAB_SCIENTIST: [
-    { label: "Processing", to: "/processing/worklist" },
-    { label: "Validation", to: "/validation/queue" },
-    { label: "QC", to: "/qc/dashboard" },
-    { label: "Dispatch", to: "/dispatch/queue" },
-  ],
-  LAB_TECHNICIAN: [
-    { label: "Processing", to: "/processing/worklist" },
+    { label: "Collection", to: "/collection/queue" },
     { label: "Pre-analytics", to: "/preanalytics/queue" },
-    { label: "Patients", to: "/reception/patients" },
-  ],
-  QC_OFFICER: [
-    { label: "QC", to: "/qc/dashboard" },
     { label: "Processing", to: "/processing/worklist" },
-    { label: "Patients", to: "/reception/patients" },
-  ],
-  DISPATCH_OFFICER: [
-    { label: "Dispatch", to: "/dispatch/queue" },
     { label: "Validation", to: "/validation/queue" },
-    { label: "Patients", to: "/reception/patients" },
-  ],
-  ACCOUNTANT: [
-    { label: "Billing", to: "/billing/dashboard" },
-    { label: "Outstanding", to: "/billing/outstanding" },
-    { label: "Patients", to: "/reception/patients" },
-  ],
-  LAB_MANAGER: [
-    { label: "Analytics", to: "/admin/analytics" },
-    { label: "Queue", to: "/reception/queue" },
     { label: "QC", to: "/qc/dashboard" },
-    { label: "Billing", to: "/billing/dashboard" },
-    { label: "Outstanding", to: "/billing/outstanding" },
-    { label: "Users", to: "/admin/users" },
+    { label: "Dispatch", to: "/dispatch/queue" },
+    { label: "Patients", to: "/reception/patients" },
   ],
-  ADMIN: [
+  SUPERVISOR: [
     { label: "Analytics", to: "/admin/analytics" },
     { label: "Register", to: "/reception/register" },
-    { label: "New Visit", to: "/reception/new-visit" },
     { label: "Queue", to: "/reception/queue" },
-    { label: "Patients", to: "/reception/patients" },
-    { label: "Collect", to: "/collection/queue" },
+    { label: "Collection", to: "/collection/queue" },
     { label: "Processing", to: "/processing/worklist" },
     { label: "Validation", to: "/validation/queue" },
     { label: "QC", to: "/qc/dashboard" },
     { label: "Dispatch", to: "/dispatch/queue" },
     { label: "Billing", to: "/billing/dashboard" },
     { label: "Outstanding", to: "/billing/outstanding" },
-    { label: "Settings", to: "/admin/settings" },
     { label: "Users", to: "/admin/users" },
+    { label: "Settings", to: "/admin/settings" },
     { label: "Catalog", to: "/admin/catalog" },
     { label: "Audit", to: "/admin/audit" },
   ],
-} as const;
+};
 
 function ProtectedLayout() {
   const user = useAuthStore((state) => state.user);
@@ -114,7 +88,7 @@ function ProtectedLayout() {
 
   return (
     <AppShell
-      title="Lab Operations"
+      title="Diagnostic Laboratory Workspace"
       subtitle={user.role.replaceAll("_", " ")}
       navItems={navItems}
       userLabel={`${user.name} - ${user.role.replaceAll("_", " ")}`}
@@ -152,6 +126,7 @@ export function App() {
         <Route path="qc/dashboard" element={<QcDashboardPage />} />
         <Route path="validation/queue" element={<ValidationQueuePage />} />
         <Route path="dispatch/queue" element={<DispatchQueuePage />} />
+        <Route path="reports/visit/:visitId" element={<ResultReportPage />} />
         <Route
           path="referral/queue"
           element={<PlaceholderPage title="Referral queue" description="Send-out logging and referral result intake live here." />}

@@ -1,6 +1,8 @@
 import { DeliveryMethod, OrderStatus, QCRule, ReportStatus, ResultFlag, ResultStatus, SampleStatus, type Prisma } from "@prisma/client";
 import type {
   DispatchReportInput,
+  EditResultInput,
+  EnterResultInput,
   ProcessingResultEntryInput,
   QcEntryCreateInput,
   SampleWorkflowUpdateInput,
@@ -59,6 +61,120 @@ function deriveFlag(range: { normalLow?: number | null; normalHigh?: number | nu
   }
 
   return ResultFlag.NORMAL;
+}
+
+function resolveNumericValue(value: string, numericValue?: number) {
+  if (numericValue != null && Number.isFinite(numericValue)) {
+    return numericValue;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function deriveManualFlag(
+  range: { normalLow?: number | null; normalHigh?: number | null; criticalLow?: number | null; criticalHigh?: number | null } | undefined,
+  numericValue: number | null,
+  providedFlag: EnterResultInput["values"][number]["flag"],
+) {
+  if (providedFlag !== "NORMAL") {
+    return providedFlag as ResultFlag;
+  }
+
+  if (numericValue == null) {
+    return ResultFlag.NORMAL;
+  }
+
+  if (range?.criticalLow != null && numericValue < range.criticalLow) {
+    return ResultFlag.CRITICAL_LOW;
+  }
+
+  if (range?.criticalHigh != null && numericValue > range.criticalHigh) {
+    return ResultFlag.CRITICAL_HIGH;
+  }
+
+  return deriveFlag(
+    {
+      normalLow: range?.normalLow,
+      normalHigh: range?.normalHigh,
+    },
+    numericValue,
+  );
+}
+
+function formatReferenceRange(
+  range:
+    | {
+        normalLow?: number | null;
+        normalHigh?: number | null;
+        criticalLow?: number | null;
+        criticalHigh?: number | null;
+        unit?: string | null;
+      }
+    | undefined,
+) {
+  if (!range) {
+    return null;
+  }
+
+  if (range.normalLow != null || range.normalHigh != null) {
+    const low = range.normalLow ?? "-";
+    const high = range.normalHigh ?? "-";
+    return `${low} - ${high}${range.unit ? ` ${range.unit}` : ""}`;
+  }
+
+  if (range.criticalLow != null || range.criticalHigh != null) {
+    const low = range.criticalLow ?? "-";
+    const high = range.criticalHigh ?? "-";
+    return `${low} - ${high}${range.unit ? ` ${range.unit}` : ""}`;
+  }
+
+  return null;
+}
+
+function validateAndBuildResultValues(
+  parameters: Array<{
+    id: string;
+    name: string;
+    referenceRanges: Array<{
+      normalLow: number | null;
+      normalHigh: number | null;
+      criticalLow: number | null;
+      criticalHigh: number | null;
+    }>;
+  }>,
+  payloadValues: EnterResultInput["values"],
+) {
+  const valuesByParameter = new Map(payloadValues.map((value) => [value.parameterId, value]));
+
+  if (valuesByParameter.size !== payloadValues.length) {
+    throw new HttpError(400, "Each analyte can only be entered once");
+  }
+
+  for (const input of payloadValues) {
+    if (!parameters.some((parameter) => parameter.id === input.parameterId)) {
+      throw new HttpError(400, "One or more result values do not belong to this test");
+    }
+  }
+
+  return parameters.map((parameter) => {
+    const input = valuesByParameter.get(parameter.id);
+
+    if (!input) {
+      throw new HttpError(400, `Enter a value for ${parameter.name}`);
+    }
+
+    const range = parameter.referenceRanges[0];
+    const numericValue = resolveNumericValue(input.value, input.numericValue);
+
+    return {
+      parameterId: parameter.id,
+      value: input.value,
+      numericValue,
+      flag: deriveManualFlag(range, numericValue, input.flag),
+      flagNote: input.flagNote || null,
+    };
+  });
 }
 
 function assertSampleWorkflowTransition(current: SampleStatus, next: SampleWorkflowUpdateInput["status"]) {
@@ -425,11 +541,206 @@ export async function enterProcessingResult(orderId: string, payload: Processing
   return result;
 }
 
+export async function enterManualResult(orderId: string, payload: EnterResultInput, userId: string) {
+  const order = await prisma.testOrder.findUniqueOrThrow({
+    where: { id: orderId },
+    include: {
+      sample: {
+        include: {
+          visit: true,
+        },
+      },
+      testCatalog: {
+        include: {
+          parameters: {
+            include: {
+              referenceRanges: true,
+            },
+            orderBy: { sortOrder: "asc" },
+          },
+        },
+      },
+      result: true,
+    },
+  });
+
+  if (
+    order.status === OrderStatus.VALIDATED ||
+    order.status === OrderStatus.REPORTED ||
+    order.status === OrderStatus.CANCELLED
+  ) {
+    throw new HttpError(400, "This test order can no longer accept direct result entry");
+  }
+
+  if (!order.testCatalog.parameters.length) {
+    throw new HttpError(400, "This test has no parameters configured");
+  }
+
+  const values = validateAndBuildResultValues(order.testCatalog.parameters, payload.values);
+
+  const result = await prisma.testResult.upsert({
+    where: { testOrderId: orderId },
+    update: {
+      status: ResultStatus.ENTERED,
+      interpretation: payload.interpretation || null,
+      method: payload.method || null,
+      instrument: payload.instrument || null,
+      technicianNote: payload.technicianNote || null,
+      enteredAt: new Date(),
+      enteredBy: userId,
+      validatedAt: null,
+      validatedById: null,
+      deltaCheckPassed: true,
+      deltaCheckNote: null,
+      values: {
+        deleteMany: {},
+        create: values,
+      },
+    },
+    create: {
+      testOrderId: orderId,
+      status: ResultStatus.ENTERED,
+      interpretation: payload.interpretation || null,
+      method: payload.method || null,
+      instrument: payload.instrument || null,
+      technicianNote: payload.technicianNote || null,
+      enteredAt: new Date(),
+      enteredBy: userId,
+      deltaCheckPassed: true,
+      values: {
+        create: values,
+      },
+    },
+    include: {
+      values: {
+        include: {
+          parameter: true,
+        },
+      },
+      testOrder: {
+        include: {
+          sample: {
+            include: {
+              visit: true,
+            },
+          },
+          testCatalog: true,
+        },
+      },
+    },
+  });
+
+  await prisma.testOrder.update({
+    where: { id: orderId },
+    data: { status: OrderStatus.RESULTED },
+  });
+
+  await syncSampleStatus(order.sampleId);
+  await syncVisitAfterOrderUpdate(order.sample.visitId);
+
+  return result;
+}
+
+export async function editResult(resultId: string, payload: EditResultInput, _userId: string) {
+  const currentResult = await prisma.testResult.findUniqueOrThrow({
+    where: { id: resultId },
+    include: {
+      testOrder: {
+        include: {
+          sample: {
+            include: {
+              visit: {
+                include: {
+                  report: true,
+                },
+              },
+            },
+          },
+          testCatalog: {
+            include: {
+              parameters: {
+                include: {
+                  referenceRanges: true,
+                },
+                orderBy: { sortOrder: "asc" },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (currentResult.testOrder.status === OrderStatus.CANCELLED) {
+    throw new HttpError(400, "Cancelled orders cannot be amended");
+  }
+
+  const values = validateAndBuildResultValues(currentResult.testOrder.testCatalog.parameters, payload.values);
+
+  const result = await prisma.testResult.update({
+    where: { id: resultId },
+    data: {
+      status: ResultStatus.AMENDED,
+      interpretation: payload.interpretation || null,
+      method: payload.method || currentResult.method || null,
+      instrument: payload.instrument || currentResult.instrument || null,
+      technicianNote: payload.technicianNote || null,
+      enteredAt: new Date(),
+      validatedAt: null,
+      validatedById: null,
+      deltaCheckPassed: true,
+      deltaCheckNote: payload.amendmentNote,
+      values: {
+        deleteMany: {},
+        create: values,
+      },
+    },
+    include: {
+      values: {
+        include: {
+          parameter: true,
+        },
+      },
+      testOrder: {
+        include: {
+          sample: {
+            include: {
+              visit: true,
+            },
+          },
+          testCatalog: true,
+        },
+      },
+    },
+  });
+
+  await prisma.testOrder.update({
+    where: { id: currentResult.testOrderId },
+    data: { status: OrderStatus.RESULTED },
+  });
+
+  if (currentResult.testOrder.sample.visit.report) {
+    await prisma.report.update({
+      where: { visitId: currentResult.testOrder.sample.visitId },
+      data: {
+        status: ReportStatus.AMENDED,
+        amendmentNote: payload.amendmentNote,
+        amendedAt: new Date(),
+      },
+    });
+  }
+
+  await syncSampleStatus(currentResult.testOrder.sampleId);
+  await syncVisitAfterOrderUpdate(currentResult.testOrder.sample.visitId);
+
+  return result;
+}
+
 export async function listValidationQueue() {
   return prisma.testResult.findMany({
     where: {
       status: {
-        in: [ResultStatus.ENTERED, ResultStatus.DELTA_CHECK_FAILED, ResultStatus.QC_FAILED],
+        in: [ResultStatus.ENTERED, ResultStatus.AMENDED, ResultStatus.DELTA_CHECK_FAILED, ResultStatus.QC_FAILED],
       },
     },
     orderBy: [{ enteredAt: "asc" }, { createdAt: "asc" }],
@@ -624,7 +935,7 @@ export async function createQcRun(materialId: string, payload: QcEntryCreateInpu
     const managers = await prisma.user.findMany({
       where: {
         role: {
-          in: ["QC_OFFICER", "LAB_MANAGER", "ADMIN"],
+          in: ["LAB_SCIENTIST", "SUPERVISOR"],
         },
       },
       select: {
@@ -877,4 +1188,151 @@ export async function listOutstandingInvoices() {
     paymentCount: invoice.payments.length,
     createdAt: invoice.createdAt.toISOString(),
   }));
+}
+
+export async function getVisitResults(visitId: string) {
+  const [visit, settings] = await Promise.all([
+    prisma.visit.findUniqueOrThrow({
+      where: { id: visitId },
+      include: {
+        patient: true,
+        invoice: true,
+        report: true,
+        samples: {
+          include: {
+            testOrders: {
+              include: {
+                testCatalog: {
+                  include: {
+                    parameters: {
+                      include: {
+                        referenceRanges: true,
+                      },
+                      orderBy: { sortOrder: "asc" },
+                    },
+                  },
+                },
+                result: {
+                  include: {
+                    values: {
+                      include: {
+                        parameter: {
+                          include: {
+                            referenceRanges: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              orderBy: [{ orderedAt: "asc" }],
+            },
+          },
+          orderBy: [{ createdAt: "asc" }],
+        },
+      },
+    }),
+    prisma.systemSetting.findMany({
+      where: {
+        key: {
+          in: [
+            "lab.name",
+            "lab.address",
+            "lab.phone",
+            "lab.director",
+            "lab.accreditation",
+            "lab.tagline",
+            "lab.logoUrl",
+          ],
+        },
+      },
+    }),
+  ]);
+
+  const settingsMap = Object.fromEntries(settings.map((setting) => [setting.key, setting.value]));
+  const orders = visit.samples.flatMap((sample) => sample.testOrders);
+
+  return {
+    lab: {
+      name: settingsMap["lab.name"] ?? "Diagnostic Laboratory",
+      address: settingsMap["lab.address"] ?? "",
+      phone: settingsMap["lab.phone"] ?? "",
+      director: settingsMap["lab.director"] ?? "",
+      accreditation: settingsMap["lab.accreditation"] ?? "",
+      tagline: settingsMap["lab.tagline"] ?? "",
+      logoUrl: settingsMap["lab.logoUrl"] ?? "",
+    },
+    visit: {
+      id: visit.id,
+      visitId: visit.visitId,
+      status: visit.status,
+      urgency: visit.urgency,
+      registeredAt: visit.registeredAt.toISOString(),
+      type: visit.type,
+      patient: {
+        id: visit.patient.id,
+        patientId: visit.patient.patientId,
+        firstName: visit.patient.firstName,
+        lastName: visit.patient.lastName,
+        gender: visit.patient.gender,
+        phone: visit.patient.phone,
+        email: visit.patient.email,
+        dateOfBirth: visit.patient.dateOfBirth.toISOString(),
+        referringDoctor: visit.referringDoctor ?? visit.patient.referringDoctor,
+        referringFacility: visit.referringFacility ?? visit.patient.referringFacility,
+        clinicalHistory: visit.clinicalHistory ?? visit.patient.clinicalHistory,
+      },
+      invoice: visit.invoice
+        ? {
+            invoiceId: visit.invoice.invoiceId,
+            status: visit.invoice.status,
+            totalAmount: visit.invoice.totalAmount,
+            patientBalance: visit.invoice.patientBalance,
+          }
+        : null,
+      report: visit.report
+        ? {
+            reportId: visit.report.reportId,
+            status: visit.report.status,
+            generatedAt: visit.report.generatedAt?.toISOString() ?? null,
+            dispatchedAt: visit.report.dispatchedAt?.toISOString() ?? null,
+            amendmentNote: visit.report.amendmentNote,
+            amendedAt: visit.report.amendedAt?.toISOString() ?? null,
+          }
+        : null,
+    },
+    tests: orders.map((order) => ({
+      id: order.id,
+      orderId: order.orderId,
+      status: order.status,
+      department: order.testCatalog.department,
+      test: {
+        code: order.testCatalog.code,
+        name: order.testCatalog.name,
+      },
+      interpretation: order.result?.interpretation ?? null,
+      method: order.result?.method ?? null,
+      instrument: order.result?.instrument ?? null,
+      technicianNote: order.result?.technicianNote ?? null,
+      validatedAt: order.result?.validatedAt?.toISOString() ?? null,
+      values:
+        order.result?.values.map((value) => ({
+          id: value.id,
+          parameterName: value.parameter.name,
+          value: value.value,
+          numericValue: value.numericValue,
+          unit: value.parameter.unit,
+          flag: value.flag,
+          flagNote: value.flagNote,
+          referenceRange: formatReferenceRange(value.parameter.referenceRanges[0]),
+        })) ?? [],
+    })),
+    summary: {
+      sampleCount: visit.samples.length,
+      testCount: orders.length,
+      resultedCount: orders.filter((order) => order.result != null).length,
+      validatedCount: orders.filter((order) => isValidatedOrReported(order.status)).length,
+    },
+  };
 }

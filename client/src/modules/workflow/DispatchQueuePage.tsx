@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { MetricCard } from "../../components/shared/MetricCard";
 import { PageHero } from "../../components/shared/PageHero";
 import { StatusBadge } from "../../components/shared/StatusBadge";
@@ -13,6 +14,7 @@ import { formatCurrency } from "../../utils/formatCurrency";
 import { formatDate } from "../../utils/formatDate";
 
 export function DispatchQueuePage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const visits = useQuery({
     queryKey: queryKeys.dispatch(),
@@ -100,6 +102,9 @@ export function DispatchQueuePage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
+                  <Button variant="ghost" onClick={() => navigate(`/reports/visit/${visit.id}`)}>
+                    Open print view
+                  </Button>
                   <Button
                     variant="secondary"
                     disabled={generateReport.isPending || visit.report?.status === "GENERATED" || visit.report?.status === "DISPATCHED"}

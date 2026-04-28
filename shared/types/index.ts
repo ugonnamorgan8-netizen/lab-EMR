@@ -2,14 +2,9 @@ import { z } from "zod";
 
 export const roles = [
   "RECEPTIONIST",
-  "PHLEBOTOMIST",
+  "ACCOUNTS",
   "LAB_SCIENTIST",
-  "LAB_TECHNICIAN",
-  "QC_OFFICER",
-  "DISPATCH_OFFICER",
-  "ACCOUNTANT",
-  "LAB_MANAGER",
-  "ADMIN",
+  "SUPERVISOR",
 ] as const;
 
 export const roleSchema = z.enum(roles);
@@ -197,6 +192,36 @@ export const dispatchReportSchema = z.object({
   deliveryMethod: z.enum(["PRINT", "EMAIL", "SMS", "PORTAL", "WHATSAPP"]).default("PRINT"),
 });
 export type DispatchReportInput = z.infer<typeof dispatchReportSchema>;
+
+export const resultValueInputSchema = z.object({
+  parameterId: z.string().min(1),
+  value: z.string().trim().min(1, "Value is required"),
+  numericValue: z.number().optional(),
+  flag: z
+    .enum(["NORMAL", "LOW", "HIGH", "CRITICAL_LOW", "CRITICAL_HIGH", "ABNORMAL", "POSITIVE", "NEGATIVE", "INDETERMINATE", "SEE_NOTE"])
+    .default("NORMAL"),
+  flagNote: z.string().optional(),
+});
+export type ResultValueInput = z.infer<typeof resultValueInputSchema>;
+
+export const enterResultSchema = z.object({
+  values: z.array(resultValueInputSchema).min(1, "Enter at least one result value"),
+  interpretation: z.string().trim().optional(),
+  method: z.string().trim().optional(),
+  instrument: z.string().trim().optional(),
+  technicianNote: z.string().trim().optional(),
+});
+export type EnterResultInput = z.infer<typeof enterResultSchema>;
+
+export const editResultSchema = z.object({
+  values: z.array(resultValueInputSchema).min(1, "Enter at least one result value"),
+  interpretation: z.string().trim().optional(),
+  method: z.string().trim().optional(),
+  instrument: z.string().trim().optional(),
+  technicianNote: z.string().trim().optional(),
+  amendmentNote: z.string().trim().min(1, "Reason for amendment is required"),
+});
+export type EditResultInput = z.infer<typeof editResultSchema>;
 
 export const apiErrorSchema = z.object({
   message: z.string(),

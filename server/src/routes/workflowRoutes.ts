@@ -3,10 +3,13 @@ import { Router } from "express";
 import {
   createQcRunHandler,
   dispatchReportHandler,
+  editResultHandler,
+  enterManualResultHandler,
   enterProcessingResultHandler,
   generateReportHandler,
   getBillingDashboardHandler,
   getQcDashboardHandler,
+  getVisitResultsHandler,
   listDispatchQueueHandler,
   listOutstandingInvoicesHandler,
   listPreanalyticsQueueHandler,
@@ -20,22 +23,31 @@ import { requireRole } from "../middleware/rbac.js";
 
 export const workflowRouter = Router();
 
-workflowRouter.get("/preanalytics", requireRole([Role.PHLEBOTOMIST, Role.LAB_TECHNICIAN, Role.LAB_SCIENTIST, Role.QC_OFFICER, Role.LAB_MANAGER, Role.ADMIN]), listPreanalyticsQueueHandler);
-workflowRouter.patch("/samples/:id/status", requireRole([Role.PHLEBOTOMIST, Role.LAB_TECHNICIAN, Role.LAB_SCIENTIST, Role.QC_OFFICER, Role.LAB_MANAGER, Role.ADMIN]), updateSampleWorkflowHandler);
+const SCIENTIST = [Role.LAB_SCIENTIST, Role.SUPERVISOR];
+const ACCOUNTS = [Role.ACCOUNTS, Role.SUPERVISOR];
+const ALL_STAFF = [Role.RECEPTIONIST, Role.ACCOUNTS, Role.LAB_SCIENTIST, Role.SUPERVISOR];
 
-workflowRouter.get("/processing", requireRole([Role.LAB_TECHNICIAN, Role.LAB_SCIENTIST, Role.LAB_MANAGER, Role.ADMIN]), listProcessingWorklistHandler);
-workflowRouter.patch("/processing/:id/start", requireRole([Role.LAB_TECHNICIAN, Role.LAB_SCIENTIST, Role.LAB_MANAGER, Role.ADMIN]), startOrderAnalysisHandler);
-workflowRouter.post("/processing/:id/result", requireRole([Role.LAB_TECHNICIAN, Role.LAB_SCIENTIST, Role.LAB_MANAGER, Role.ADMIN]), enterProcessingResultHandler);
+workflowRouter.get("/preanalytics", requireRole(SCIENTIST), listPreanalyticsQueueHandler);
+workflowRouter.patch("/samples/:id/status", requireRole(SCIENTIST), updateSampleWorkflowHandler);
 
-workflowRouter.get("/validation", requireRole([Role.LAB_SCIENTIST, Role.DISPATCH_OFFICER, Role.LAB_MANAGER, Role.ADMIN]), listValidationQueueHandler);
-workflowRouter.patch("/validation/:id/validate", requireRole([Role.LAB_SCIENTIST, Role.LAB_MANAGER, Role.ADMIN]), validateResultHandler);
+workflowRouter.get("/processing", requireRole(SCIENTIST), listProcessingWorklistHandler);
+workflowRouter.patch("/processing/:id/start", requireRole(SCIENTIST), startOrderAnalysisHandler);
+workflowRouter.post("/processing/:id/result", requireRole(SCIENTIST), enterProcessingResultHandler);
 
-workflowRouter.get("/qc", requireRole([Role.QC_OFFICER, Role.LAB_SCIENTIST, Role.LAB_MANAGER, Role.ADMIN]), getQcDashboardHandler);
-workflowRouter.post("/qc/materials/:id/entries", requireRole([Role.QC_OFFICER, Role.LAB_SCIENTIST, Role.LAB_MANAGER, Role.ADMIN]), createQcRunHandler);
+// Manual per-analyte result entry and amendment
+workflowRouter.post("/processing/:id/result-manual", requireRole(SCIENTIST), enterManualResultHandler);
+workflowRouter.patch("/results/:id/amend", requireRole(SCIENTIST), editResultHandler);
+workflowRouter.get("/visits/:visitId/results", requireRole(ALL_STAFF), getVisitResultsHandler);
 
-workflowRouter.get("/dispatch", requireRole([Role.DISPATCH_OFFICER, Role.LAB_SCIENTIST, Role.LAB_MANAGER, Role.ADMIN]), listDispatchQueueHandler);
-workflowRouter.post("/dispatch/:id/generate", requireRole([Role.DISPATCH_OFFICER, Role.LAB_SCIENTIST, Role.LAB_MANAGER, Role.ADMIN]), generateReportHandler);
-workflowRouter.post("/dispatch/:id/dispatch", requireRole([Role.DISPATCH_OFFICER, Role.LAB_SCIENTIST, Role.LAB_MANAGER, Role.ADMIN]), dispatchReportHandler);
+workflowRouter.get("/validation", requireRole(SCIENTIST), listValidationQueueHandler);
+workflowRouter.patch("/validation/:id/validate", requireRole(SCIENTIST), validateResultHandler);
 
-workflowRouter.get("/billing/dashboard", requireRole([Role.ACCOUNTANT, Role.LAB_MANAGER, Role.ADMIN]), getBillingDashboardHandler);
-workflowRouter.get("/billing/outstanding", requireRole([Role.ACCOUNTANT, Role.LAB_MANAGER, Role.ADMIN]), listOutstandingInvoicesHandler);
+workflowRouter.get("/qc", requireRole(SCIENTIST), getQcDashboardHandler);
+workflowRouter.post("/qc/materials/:id/entries", requireRole(SCIENTIST), createQcRunHandler);
+
+workflowRouter.get("/dispatch", requireRole(SCIENTIST), listDispatchQueueHandler);
+workflowRouter.post("/dispatch/:id/generate", requireRole(SCIENTIST), generateReportHandler);
+workflowRouter.post("/dispatch/:id/dispatch", requireRole(SCIENTIST), dispatchReportHandler);
+
+workflowRouter.get("/billing/dashboard", requireRole(ACCOUNTS), getBillingDashboardHandler);
+workflowRouter.get("/billing/outstanding", requireRole(ACCOUNTS), listOutstandingInvoicesHandler);

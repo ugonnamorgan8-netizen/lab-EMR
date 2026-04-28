@@ -6,14 +6,9 @@ const prisma = new PrismaClient();
 
 const users = [
   ["Reception User", "reception@labemr.test", Role.RECEPTIONIST, "Reception"],
-  ["Phlebotomy User", "phlebotomy@labemr.test", Role.PHLEBOTOMIST, "Collection"],
-  ["Scientist User", "scientist@labemr.test", Role.LAB_SCIENTIST, "Processing"],
-  ["Technician User", "technician@labemr.test", Role.LAB_TECHNICIAN, "Processing"],
-  ["QC User", "qc@labemr.test", Role.QC_OFFICER, "Quality Control"],
-  ["Dispatch User", "dispatch@labemr.test", Role.DISPATCH_OFFICER, "Dispatch"],
-  ["Account User", "accountant@labemr.test", Role.ACCOUNTANT, "Billing"],
-  ["Manager User", "manager@labemr.test", Role.LAB_MANAGER, "Management"],
-  ["Admin User", "admin@labemr.test", Role.ADMIN, "Administration"],
+  ["Accounts User", "accounts@labemr.test", Role.ACCOUNTS, "Accounts"],
+  ["Scientist User", "scientist@labemr.test", Role.LAB_SCIENTIST, "Laboratory"],
+  ["Supervisor User", "supervisor@labemr.test", Role.SUPERVISOR, "Management"],
 ] as const;
 
 const patients = Array.from({ length: 20 }).map((_, index) => ({
@@ -156,11 +151,13 @@ async function main() {
 
   await prisma.systemSetting.createMany({
     data: [
-      { key: "lab.name", value: "Standalone Laboratory EMR" },
+      { key: "lab.name", value: "Medicare Diagnostic Laboratory" },
       { key: "lab.address", value: "12 Medical Drive, Ikeja, Lagos" },
       { key: "lab.phone", value: "+234 800 000 0000" },
       { key: "lab.director", value: "Dr. Ifeoma Balogun, FMCPath" },
       { key: "lab.accreditation", value: "MLSCN-ACC-2026-014" },
+      { key: "lab.tagline", value: "Excellence in Diagnostic Services" },
+      { key: "lab.logoUrl", value: "/lab-logo.jpeg" },
     ],
   });
 
@@ -229,7 +226,7 @@ async function main() {
     },
   });
 
-  const qcOfficer = createdUsers.find((user) => user.role === Role.QC_OFFICER)!;
+  const qcOfficer = createdUsers.find((user) => user.role === Role.LAB_SCIENTIST)!;
   for (const [index, testCatalogId] of [fbc.id, lft.id, glu.id].entries()) {
     const material = await prisma.qCMaterial.create({
       data: {
@@ -260,9 +257,9 @@ async function main() {
   }
 
   const receptionist = createdUsers.find((user) => user.role === Role.RECEPTIONIST)!;
-  const phlebotomist = createdUsers.find((user) => user.role === Role.PHLEBOTOMIST)!;
   const scientist = createdUsers.find((user) => user.role === Role.LAB_SCIENTIST)!;
-  const accountant = createdUsers.find((user) => user.role === Role.ACCOUNTANT)!;
+  const accountant = createdUsers.find((user) => user.role === Role.ACCOUNTS)!;
+  const supervisor = createdUsers.find((user) => user.role === Role.SUPERVISOR)!;
 
   for (let i = 0; i < 15; i += 1) {
     const patient = createdPatients[i];
@@ -314,7 +311,7 @@ async function main() {
                 ? SampleStatus.COLLECTED
                 : SampleStatus.IN_ANALYSIS,
           collectedAt: visit.status === VisitStatus.REGISTERED ? null : dayjs().subtract(6, "hour").toDate(),
-          collectedById: visit.status === VisitStatus.REGISTERED ? null : phlebotomist.id,
+          collectedById: visit.status === VisitStatus.REGISTERED ? null : scientist.id,
         },
       });
 
@@ -414,7 +411,7 @@ async function main() {
           visitId: visit.id,
           generatedAt: dayjs().subtract(1, "hour").toDate(),
           dispatchedAt: visit.status === VisitStatus.DISPATCHED ? dayjs().toDate() : null,
-          dispatchedById: visit.status === VisitStatus.DISPATCHED ? createdUsers.find((user) => user.role === Role.DISPATCH_OFFICER)?.id : null,
+          dispatchedById: visit.status === VisitStatus.DISPATCHED ? supervisor.id : null,
           deliveryMethod: visit.status === VisitStatus.DISPATCHED ? ["PRINT", "EMAIL"] : [],
           status: visit.status === VisitStatus.DISPATCHED ? "DISPATCHED" : "GENERATED",
           pdfUrl: `/reports/${visit.visitId}.pdf`,

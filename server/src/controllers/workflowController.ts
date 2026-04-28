@@ -1,6 +1,8 @@
 import type { Response } from "express";
 import {
   dispatchReportSchema,
+  editResultSchema,
+  enterResultSchema,
   processingResultEntrySchema,
   qcEntryCreateSchema,
   sampleWorkflowUpdateSchema,
@@ -9,10 +11,13 @@ import type { AuthenticatedRequest } from "../types.js";
 import {
   createQcRun,
   dispatchReport,
+  editResult,
+  enterManualResult,
   enterProcessingResult,
   generateReport,
   getBillingDashboard,
   getQcDashboard,
+  getVisitResults,
   listDispatchQueue,
   listOutstandingInvoices,
   listPreanalyticsSamples,
@@ -48,6 +53,23 @@ export async function enterProcessingResultHandler(request: AuthenticatedRequest
   const payload = processingResultEntrySchema.parse(request.body);
   const result = await enterProcessingResult(String(request.params.id), payload, request.user!.id);
   return response.json(result);
+}
+
+export async function enterManualResultHandler(request: AuthenticatedRequest, response: Response) {
+  const payload = enterResultSchema.parse(request.body);
+  const result = await enterManualResult(String(request.params.id), payload, request.user!.id);
+  return response.json(result);
+}
+
+export async function editResultHandler(request: AuthenticatedRequest, response: Response) {
+  const payload = editResultSchema.parse(request.body);
+  const result = await editResult(String(request.params.id), payload, request.user!.id);
+  return response.json(result);
+}
+
+export async function getVisitResultsHandler(request: AuthenticatedRequest, response: Response) {
+  const report = await getVisitResults(String(request.params.visitId));
+  return response.json(report);
 }
 
 export async function listValidationQueueHandler(_request: AuthenticatedRequest, response: Response) {

@@ -95,7 +95,7 @@ export function AdminCatalogPage() {
         <Card className="space-y-4">
           <div>
             <h3 className="text-lg font-semibold text-slate-900">Tests</h3>
-            <p className="text-sm text-slate-500">Admins can adjust pricing, departments, and activation state.</p>
+            <p className="text-sm text-slate-500">Supervisors can adjust pricing, departments, and activation state.</p>
           </div>
           <div className="space-y-3">
             {catalogQuery.data.tests.map((test) => {

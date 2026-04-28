@@ -263,11 +263,16 @@ export type ProcessingOrder = {
     id: string;
     status: string;
     enteredAt?: string | null;
+    interpretation?: string | null;
+    method?: string | null;
+    instrument?: string | null;
+    technicianNote?: string | null;
     values: Array<{
       id: string;
       value: string;
       numericValue?: number | null;
       flag: string;
+      flagNote?: string | null;
       parameter: {
         id: string;
         name: string;
@@ -400,4 +405,82 @@ export type OutstandingInvoice = {
   status: string;
   paymentCount: number;
   createdAt: string;
+};
+
+export type ResultReportResponse = {
+  lab: {
+    name: string;
+    address: string;
+    phone: string;
+    director: string;
+    accreditation: string;
+    tagline: string;
+    logoUrl: string;
+  };
+  visit: {
+    id: string;
+    visitId: string;
+    status: string;
+    urgency: string;
+    registeredAt: string;
+    type: string;
+    patient: {
+      id: string;
+      patientId: string;
+      firstName: string;
+      lastName: string;
+      gender: string;
+      phone: string;
+      email?: string | null;
+      dateOfBirth: string;
+      referringDoctor?: string | null;
+      referringFacility?: string | null;
+      clinicalHistory?: string | null;
+    };
+    invoice?: {
+      invoiceId: string;
+      status: string;
+      totalAmount: number;
+      patientBalance: number;
+    } | null;
+    report?: {
+      reportId: string;
+      status: string;
+      generatedAt?: string | null;
+      dispatchedAt?: string | null;
+      amendmentNote?: string | null;
+      amendedAt?: string | null;
+    } | null;
+  };
+  tests: Array<{
+    id: string;
+    orderId: string;
+    status: string;
+    department: string;
+    test: {
+      code: string;
+      name: string;
+    };
+    interpretation?: string | null;
+    method?: string | null;
+    instrument?: string | null;
+    technicianNote?: string | null;
+    validatedAt?: string | null;
+    values: Array<{
+      id: string;
+      parameterName: string;
+      value: string;
+      numericValue?: number | null;
+      unit: string;
+      flag: string;
+      flagNote?: string | null;
+      referenceRange?: string | null;
+    }>;
+  }>;
+  summary: {
+    sampleCount: number;
+    testCount: number;
+    resultedCount: number;
+    validatedCount: number;
+  };
 };

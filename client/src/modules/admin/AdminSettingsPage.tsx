@@ -71,7 +71,7 @@ export function AdminSettingsPage() {
       <Card className="space-y-4">
         <div>
           <h3 className="text-lg font-semibold text-slate-900">Lab configuration</h3>
-          <p className="text-sm text-slate-500">Admins can update general system settings here and changes are tracked in audit.</p>
+          <p className="text-sm text-slate-500">Supervisor-controlled facility settings live here, including the lab name, tagline, and an optional logo URL override for printed reports and in-app branding.</p>
         </div>
         {settingsQuery.data.settings.length === 0 ? (
           <EmptyState title="No settings found" message="Seeded system settings will appear here." />

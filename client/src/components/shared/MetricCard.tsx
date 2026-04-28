@@ -14,7 +14,7 @@ export function MetricCard({
 }) {
   return (
     <Card className="relative overflow-hidden">
-      <div className="absolute right-0 top-0 h-20 w-20 rounded-full bg-slate-100 blur-2xl" />
+      <div className="absolute right-0 top-0 h-20 w-20 rounded-full bg-sky-100 blur-2xl" />
       <div className="relative">
         <div className="flex items-start justify-between gap-3">
           <p className="text-sm font-medium text-slate-500">{label}</p>

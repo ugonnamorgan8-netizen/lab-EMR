@@ -6,13 +6,15 @@ export default {
     extend: {
       colors: {
         brand: {
-          blue: "#0F4C81",
+          blue: "#0F5EA8",
+          navy: "#0F2F58",
+          sky: "#5FA8FF",
           green: "#157347",
           amber: "#B7791F",
           red: "#B42318",
-          gray: "#5B6470",
-          border: "#D8E0EA",
-          surface: "#EEF2F6",
+          gray: "#5A6880",
+          border: "#C9DDF7",
+          surface: "#F1F7FF",
         },
       },
       fontFamily: {
@@ -20,7 +22,7 @@ export default {
       },
       boxShadow: {
         none: "none",
-        panel: "0 18px 40px rgba(15, 23, 42, 0.08)",
+        panel: "0 20px 48px rgba(12, 41, 82, 0.12)",
       },
     },
   },

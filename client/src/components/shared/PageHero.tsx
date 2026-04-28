@@ -12,7 +12,7 @@ export function PageHero({
   aside?: ReactNode;
 }) {
   return (
-    <div className="overflow-hidden rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,rgba(15,23,42,0.98),rgba(30,41,59,0.96)_42%,rgba(10,37,64,0.92))] px-6 py-7 text-white shadow-[0_24px_64px_rgba(15,23,42,0.16)]">
+    <div className="overflow-hidden rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,rgba(15,47,88,0.98),rgba(15,94,168,0.95)_48%,rgba(95,168,255,0.82))] px-6 py-7 text-white shadow-[0_24px_64px_rgba(12,41,82,0.2)]">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-200">{eyebrow}</p>

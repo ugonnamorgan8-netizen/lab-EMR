@@ -4,8 +4,8 @@ import { requireRole } from "../middleware/rbac.js";
 describe("requireRole", () => {
   it("allows permitted roles", () => {
     const next = vi.fn();
-    const middleware = requireRole(["ADMIN"]);
-    middleware({ user: { role: "ADMIN" } } as never, {} as never, next);
+    const middleware = requireRole(["SUPERVISOR"]);
+    middleware({ user: { role: "SUPERVISOR" } } as never, {} as never, next);
     expect(next).toHaveBeenCalled();
   });
 });

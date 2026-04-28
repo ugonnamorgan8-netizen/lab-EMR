@@ -72,7 +72,7 @@ export function CollectionWorkspacePage() {
   return (
     <div className="space-y-5">
       <PageHero
-        eyebrow="Phlebotomy"
+        eyebrow="Specimen Collection"
         title={`${visit.data.patient.firstName} ${visit.data.patient.lastName}`}
         description={`Collection workspace for ${visit.data.visitId}. Confirm every requested container, collect each specimen, and move the visit into pre-analytics cleanly.`}
         aside={

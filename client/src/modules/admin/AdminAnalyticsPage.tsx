@@ -43,7 +43,7 @@ export function AdminAnalyticsPage() {
         <MetricCard label="Patients on record" value={metrics.totalPatients} hint="Total patient registry size" />
         <MetricCard label="Visits today" value={metrics.visitsToday} hint="Registrations since midnight" />
         <MetricCard label="Active visits" value={metrics.activeVisits} hint="Work still moving through the lab" />
-        <MetricCard label="Pending collection" value={metrics.pendingSamples} hint="Samples awaiting phlebotomy" />
+        <MetricCard label="Pending collection" value={metrics.pendingSamples} hint="Samples awaiting specimen collection" />
         <MetricCard label="Tests in analysis" value={metrics.testsInAnalysis} hint="Orders currently on the bench" />
         <MetricCard label="Reports ready" value={metrics.reportsGenerated} hint="Generated or dispatched reports" />
         <MetricCard label="Collected revenue" value={formatCurrency(metrics.revenueCollected)} hint="Payments recorded in the system" />

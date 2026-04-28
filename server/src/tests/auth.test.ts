@@ -7,7 +7,7 @@ describe("auth token signing", () => {
       id: "user-1",
       name: "Test User",
       email: "test@example.com",
-      role: "ADMIN",
+      role: "SUPERVISOR",
       department: "IT",
     });
 
