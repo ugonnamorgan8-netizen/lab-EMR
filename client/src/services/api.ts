@@ -10,6 +10,35 @@ const api = axios.create({
   withCredentials: true,
 });
 
+function extractApiErrorMessage(error: unknown) {
+  if (!axios.isAxiosError(error)) {
+    return null;
+  }
+
+  const payload = error.response?.data as
+    | {
+        message?: string;
+        details?: Record<string, string[] | undefined>;
+      }
+    | undefined;
+
+  if (!payload) {
+    return null;
+  }
+
+  const detailLines = payload.details
+    ? Object.values(payload.details)
+        .flat()
+        .filter((value): value is string => Boolean(value))
+    : [];
+
+  if (detailLines.length > 0) {
+    return detailLines[0];
+  }
+
+  return payload.message ?? null;
+}
+
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;
   if (token) {
@@ -42,6 +71,11 @@ api.interceptors.response.use(
         useAuthStore.getState().clearSession();
         return Promise.reject(refreshError);
       }
+    }
+
+    const message = extractApiErrorMessage(error);
+    if (message) {
+      error.message = message;
     }
 
     return Promise.reject(error);

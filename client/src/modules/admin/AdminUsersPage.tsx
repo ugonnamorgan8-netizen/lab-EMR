@@ -27,6 +27,16 @@ type CreateAccountDraft = {
   department: string;
 };
 
+function passwordChecks(password: string) {
+  return {
+    length: password.length >= 8,
+    lowercase: /[a-z]/.test(password),
+    uppercase: /[A-Z]/.test(password),
+    number: /[0-9]/.test(password),
+    symbol: /[^A-Za-z0-9]/.test(password),
+  };
+}
+
 function SummaryCard({ label, value }: { label: string; value: number }) {
   return (
     <Card>
@@ -71,6 +81,7 @@ export function AdminUsersPage() {
       return response.data as AdminUsersResponse;
     },
   });
+  const passwordRules = passwordChecks(createDraft.password);
 
   const createUser = useMutation({
     mutationFn: async (payload: CreateAccountDraft) => {
@@ -133,7 +144,7 @@ export function AdminUsersPage() {
   const createDisabled =
     !createDraft.name.trim() ||
     !createDraft.email.trim() ||
-    createDraft.password.length < 8 ||
+    !Object.values(passwordRules).every(Boolean) ||
     createUser.isPending;
 
   return (
@@ -172,6 +183,13 @@ export function AdminUsersPage() {
               onChange={(event) => setCreateDraft((current) => ({ ...current, password: event.target.value }))}
               placeholder="Minimum 8 chars with upper, lower, number, symbol"
             />
+            <div className="grid gap-1 rounded-xl border border-brand-border bg-brand-surface/50 px-3 py-3 text-xs text-slate-600">
+              <p className={passwordRules.length ? "text-emerald-700" : "text-slate-500"}>At least 8 characters</p>
+              <p className={passwordRules.lowercase ? "text-emerald-700" : "text-slate-500"}>Contains a lowercase letter</p>
+              <p className={passwordRules.uppercase ? "text-emerald-700" : "text-slate-500"}>Contains an uppercase letter</p>
+              <p className={passwordRules.number ? "text-emerald-700" : "text-slate-500"}>Contains a number</p>
+              <p className={passwordRules.symbol ? "text-emerald-700" : "text-slate-500"}>Contains a symbol</p>
+            </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="space-y-1 text-sm text-slate-600">
@@ -272,7 +290,7 @@ export function AdminUsersPage() {
                       <div>
                         <p className="font-semibold text-slate-900">{user.name}</p>
                         <p className="text-sm text-slate-500 break-all">
-                          {user.email} / created {formatDate(user.createdAt)} / last login {user.lastLogin ? formatDate(user.lastLogin) : "Never"}
+                          {user.email} / created {formatDate(user.createdAt)} / last login {user.lastLogin ? formatDate(user.lastLogin) : "Not signed in yet"}
                         </p>
                       </div>
                       <div className="flex flex-wrap gap-2">
