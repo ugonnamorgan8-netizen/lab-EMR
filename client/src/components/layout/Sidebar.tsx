@@ -28,13 +28,30 @@ export function Sidebar({ items }: { items: NavItem[] }) {
             to={item.to}
             className={({ isActive }) =>
               cn(
-                "flex items-center justify-between rounded-2xl border border-transparent bg-slate-950/12 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/18 hover:bg-slate-950/20 hover:text-white",
-                isActive && "border-white/24 bg-white text-slate-900 shadow-[0_16px_34px_rgba(7,24,48,0.2)]",
+                "flex items-center justify-between rounded-2xl border border-transparent bg-slate-950/12 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/18 hover:bg-slate-950/20",
+                isActive
+                  ? "border-white/24 bg-white text-slate-900 shadow-[0_16px_34px_rgba(7,24,48,0.2)] hover:text-slate-900"
+                  : "hover:text-white",
               )
             }
           >
-            <span>{item.label}</span>
-            {item.badge ? <span className="rounded-full border border-white/20 bg-slate-950/18 px-2 py-0.5 text-xs text-white">{item.badge}</span> : null}
+            {({ isActive }) => (
+              <>
+                <span>{item.label}</span>
+                {item.badge ? (
+                  <span
+                    className={cn(
+                      "rounded-full border px-2 py-0.5 text-xs",
+                      isActive
+                        ? "border-brand-blue/30 bg-brand-blue/10 text-brand-blue"
+                        : "border-white/20 bg-slate-950/18 text-white",
+                    )}
+                  >
+                    {item.badge}
+                  </span>
+                ) : null}
+              </>
+            )}
           </NavLink>
         ))}
       </nav>
