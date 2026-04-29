@@ -37,31 +37,82 @@ export function BillingDashboardPage() {
         aside={<div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-slate-100">Invoices: {billing.data.summary.totalInvoices}</div>}
       />
 
+      {/* ── Key financial metrics ─────────────────────────────────────── */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <MetricCard label="Gross revenue" value={formatCurrency(billing.data.summary.grossRevenue)} hint="Total invoiced value in the system" />
-        <MetricCard label="Collected revenue" value={formatCurrency(billing.data.summary.collectedRevenue)} hint="Payments recorded to date" />
-        <MetricCard label="Outstanding balance" value={formatCurrency(billing.data.summary.outstandingBalance)} hint="Remaining patient receivables" />
-        <MetricCard label="Unpaid invoices" value={billing.data.summary.unpaidCount} hint="Invoices with no payment recorded yet" />
-        <MetricCard label="Partial invoices" value={billing.data.summary.partialCount} hint="Invoices still carrying a balance" />
-        <MetricCard label="Invoice volume" value={billing.data.summary.totalInvoices} hint="Total billing records issued" />
+        <MetricCard
+          label="Gross revenue"
+          value={formatCurrency(billing.data.summary.grossRevenue)}
+          hint="Total invoiced value in the system"
+          icon="💼"
+          variant="blue"
+        />
+        <MetricCard
+          label="Collected revenue"
+          value={formatCurrency(billing.data.summary.collectedRevenue)}
+          hint="Payments recorded to date"
+          icon="💰"
+          variant="emerald"
+        />
+        <MetricCard
+          label="Outstanding balance"
+          value={formatCurrency(billing.data.summary.outstandingBalance)}
+          hint="Remaining patient receivables"
+          icon="💳"
+          variant="rose"
+        />
+        <MetricCard
+          label="Unpaid invoices"
+          value={billing.data.summary.unpaidCount}
+          hint="Invoices with no payment recorded yet"
+          icon="🧾"
+          variant="amber"
+        />
+        <MetricCard
+          label="Partial invoices"
+          value={billing.data.summary.partialCount}
+          hint="Invoices still carrying a balance"
+          icon="⚖️"
+          variant="orange"
+        />
+        <MetricCard
+          label="Invoice volume"
+          value={billing.data.summary.totalInvoices}
+          hint="Total billing records issued"
+          icon="🗂️"
+          variant="violet"
+        />
       </div>
 
+      {/* ── Recent invoices ───────────────────────────────────────────── */}
       {billing.data.invoices.length === 0 ? (
         <EmptyState title="No invoice history" message="Invoices will appear here once visits are billed." />
       ) : (
-        <Card className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold text-slate-900">Recent invoices</h3>
-            <p className="text-sm text-slate-500">Latest billing activity across the lab</p>
+        <Card variant="gradient" className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 text-xl text-white shadow">
+              🧾
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900">Recent invoices</h3>
+              <p className="text-sm text-slate-500">Latest billing activity across the lab</p>
+            </div>
           </div>
           <div className="space-y-3">
             {billing.data.invoices.map((invoice) => (
-              <div key={invoice.id} className="flex flex-col gap-3 rounded-2xl border border-brand-border p-4 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <p className="font-semibold text-slate-900">{invoice.invoiceId}</p>
-                  <p className="text-sm text-slate-500">
-                    {invoice.patientName} · {invoice.visitRef} · {formatDate(invoice.createdAt)}
-                  </p>
+              <div
+                key={invoice.id}
+                className="flex flex-col gap-3 rounded-2xl border border-brand-border bg-white/70 p-4 shadow-sm transition-all duration-200 hover:shadow-md lg:flex-row lg:items-center lg:justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 text-xl">
+                    💳
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">{invoice.invoiceId}</p>
+                    <p className="text-sm text-slate-500">
+                      {invoice.patientName} · {invoice.visitRef} · {formatDate(invoice.createdAt)}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="text-right">

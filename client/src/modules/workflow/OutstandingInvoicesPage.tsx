@@ -57,40 +57,72 @@ export function OutstandingInvoicesPage() {
         aside={<div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-slate-100">Open balances: {invoices.data.length}</div>}
       />
 
+      {/* ── Summary metric cards ──────────────────────────────────────── */}
       <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard label="Patients awaiting payment" value={invoices.data.length} hint="Invoices still waiting for full accounts confirmation" />
-        <MetricCard label="Outstanding value" value={formatCurrency(outstandingBalance)} hint="Combined receivables still open" />
-        <MetricCard label="Average bill" value={formatCurrency(invoices.data.length ? outstandingBalance / invoices.data.length : 0)} hint="Average amount currently presented at the desk" />
+        <MetricCard
+          label="Patients awaiting payment"
+          value={invoices.data.length}
+          hint="Invoices still waiting for full accounts confirmation"
+          icon="🧑‍💼"
+          variant="blue"
+        />
+        <MetricCard
+          label="Outstanding value"
+          value={formatCurrency(outstandingBalance)}
+          hint="Combined receivables still open"
+          icon="💰"
+          variant="rose"
+        />
+        <MetricCard
+          label="Average bill"
+          value={formatCurrency(invoices.data.length ? outstandingBalance / invoices.data.length : 0)}
+          hint="Average amount currently presented at the desk"
+          icon="💳"
+          variant="amber"
+        />
       </div>
 
+      {/* ── Invoice cards ─────────────────────────────────────────────── */}
       {invoices.data.length === 0 ? (
         <EmptyState title="No outstanding invoices" message="All current invoices are settled." />
       ) : (
         <div className="grid gap-4">
           {invoices.data.map((invoice) => (
-            <Card key={invoice.id} className="space-y-4">
+            <Card key={invoice.id} variant="gradient" className="space-y-4">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">{invoice.invoiceId}</p>
-                  <h3 className="mt-2 text-xl font-semibold text-slate-900">{invoice.patientName}</h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {invoice.visitRef} · {invoice.patientPhone} · raised {formatDate(invoice.createdAt)}
-                  </p>
+                {/* Patient info */}
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-700 text-2xl text-white shadow-md">
+                    👤
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">{invoice.invoiceId}</p>
+                    <h3 className="mt-1 text-xl font-semibold text-slate-900">{invoice.patientName}</h3>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {invoice.visitRef} · {invoice.patientPhone} · raised {formatDate(invoice.createdAt)}
+                    </p>
+                  </div>
                 </div>
+
+                {/* Amount + actions */}
                 <div className="flex flex-wrap items-center gap-3">
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-slate-900">{formatCurrency(invoice.totalAmount)}</p>
-                    <p className="text-xs text-slate-500">Balance {formatCurrency(invoice.patientBalance)}</p>
+                  {/* Amount pill */}
+                  <div className="flex items-center gap-2 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-100/60 border border-emerald-200/60 px-4 py-2">
+                    <span className="text-lg">💰</span>
+                    <div>
+                      <p className="text-sm font-bold text-emerald-900">{formatCurrency(invoice.totalAmount)}</p>
+                      <p className="text-xs text-slate-500">Balance {formatCurrency(invoice.patientBalance)}</p>
+                    </div>
                   </div>
                   <StatusBadge status={invoice.status} />
                   <Button variant="secondary" onClick={() => navigate(`/billing/invoice/${invoice.visitId}`)}>
-                    Open invoice
+                    🧾 Open invoice
                   </Button>
                   <Button
                     disabled={settleInvoice.isPending}
                     onClick={() => settleInvoice.mutate({ visitId: invoice.visitId, amount: invoice.patientBalance })}
                   >
-                    Confirm full payment
+                    ✅ Confirm full payment
                   </Button>
                 </div>
               </div>

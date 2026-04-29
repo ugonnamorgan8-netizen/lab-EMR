@@ -52,28 +52,59 @@ export function QcDashboardPage() {
         aside={<div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-slate-100">Active materials: {qc.data.summary.activeMaterials}</div>}
       />
 
+      {/* ── QC summary cards ──────────────────────────────────────────── */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Active materials" value={qc.data.summary.activeMaterials} hint="Controls currently in service" />
-        <MetricCard label="Warning runs" value={qc.data.summary.warningRuns} hint="Recent 1-2s alerts requiring closer watch" />
-        <MetricCard label="Rejected runs" value={qc.data.summary.rejectedRuns} hint="Out-of-control runs that should block release" />
-        <MetricCard label="Expiring soon" value={qc.data.summary.expiringSoon} hint="Materials within the next 30 days of expiry" />
+        <MetricCard
+          label="Active materials"
+          value={qc.data.summary.activeMaterials}
+          hint="Controls currently in service"
+          icon="🧫"
+          variant="teal"
+        />
+        <MetricCard
+          label="Warning runs"
+          value={qc.data.summary.warningRuns}
+          hint="Recent 1-2s alerts requiring closer watch"
+          icon="⚠️"
+          variant="amber"
+        />
+        <MetricCard
+          label="Rejected runs"
+          value={qc.data.summary.rejectedRuns}
+          hint="Out-of-control runs that should block release"
+          icon="🚨"
+          variant="rose"
+        />
+        <MetricCard
+          label="Expiring soon"
+          value={qc.data.summary.expiringSoon}
+          hint="Materials within the next 30 days of expiry"
+          icon="⏳"
+          variant="orange"
+        />
       </div>
 
+      {/* ── Materials list ───────────────────────────────────────────── */}
       {qc.data.materials.length === 0 ? (
         <EmptyState title="No QC materials configured" message="QC materials will appear here once loaded into the system." />
       ) : (
         <div className="grid gap-4 xl:grid-cols-2">
           {qc.data.materials.map((material) => (
-            <Card key={material.id} className="space-y-4">
+            <Card key={material.id} variant="gradient" className="space-y-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">{material.testCatalog.code}</p>
-                  <h3 className="mt-2 text-xl font-semibold text-slate-900">
-                    {material.name} · {material.level}
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {material.testCatalog.name} · Lot {material.lotNumber} · Expires {formatDate(material.expiryDate)}
-                  </p>
+                <div className="flex items-start gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-700 text-xl text-white shadow">
+                    🧫
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">{material.testCatalog.code}</p>
+                    <h3 className="mt-1 text-lg font-semibold text-slate-900">
+                      {material.name} · {material.level}
+                    </h3>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {material.testCatalog.name} · Lot {material.lotNumber} · Expires {formatDate(material.expiryDate)}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <StatusBadge status={material.active ? "IN_CONTROL" : "INACTIVE"} />
@@ -100,17 +131,19 @@ export function QcDashboardPage() {
                     })
                   }
                 >
-                  Record run
+                  📊 Record run
                 </Button>
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm font-semibold text-slate-700">Recent runs</p>
+                <p className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <span>📋</span> Recent runs
+                </p>
                 {material.entries.length === 0 ? (
                   <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-500">No QC entries recorded yet.</div>
                 ) : (
                   material.entries.map((entry) => (
-                    <div key={entry.id} className="flex flex-col gap-2 rounded-2xl border border-brand-border p-3 md:flex-row md:items-center md:justify-between">
+                    <div key={entry.id} className="flex flex-col gap-2 rounded-2xl border border-brand-border bg-white/70 p-3 shadow-sm md:flex-row md:items-center md:justify-between">
                       <div>
                         <p className="font-medium text-slate-900">
                           Value {entry.value} · z-score {entry.zScore}

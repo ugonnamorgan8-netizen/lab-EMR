@@ -73,9 +73,9 @@ export function PreanalyticsQueuePage() {
       />
 
       <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard label="Samples in queue" value={activeCount} hint="Collected samples awaiting downstream handling" />
-        <MetricCard label="In centrifuge" value={centrifugeCount} hint="Specimens currently spinning or ready for separation" />
-        <MetricCard label="Ready for analysis" value={directAnalysisCount} hint="Aliquoted samples ready for the processing bench" />
+        <MetricCard label="Samples in queue" value={activeCount} hint="Collected samples awaiting downstream handling" icon="🧪" variant="blue" />
+        <MetricCard label="In centrifuge" value={centrifugeCount} hint="Specimens currently spinning or ready for separation" icon="🌀" variant="violet" />
+        <MetricCard label="Ready for analysis" value={directAnalysisCount} hint="Aliquoted samples ready for the processing bench" icon="⚗️" variant="emerald" />
       </div>
 
       {samples.data.length === 0 ? (
@@ -83,19 +83,24 @@ export function PreanalyticsQueuePage() {
       ) : (
         <div className="grid gap-4">
           {samples.data.map((sample) => (
-            <Card key={sample.id} className="space-y-4">
+            <Card key={sample.id} variant="gradient" className="space-y-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">{sample.specimenId}</p>
-                  <h3 className="mt-2 text-xl font-semibold text-slate-900">
-                    {sample.visit.patient.firstName} {sample.visit.patient.lastName}
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {sample.visit.visitId} · {sample.specimenType.replaceAll("_", " ")} · {sample.container}
-                  </p>
-                  <p className="mt-2 text-sm text-slate-600">
-                    Tests: {sample.testOrders.map((order) => order.testCatalog.code).join(", ")}
-                  </p>
+                <div className="flex items-start gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-700 text-xl text-white shadow">
+                    🧪
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">{sample.specimenId}</p>
+                    <h3 className="mt-1 text-xl font-semibold text-slate-900">
+                      {sample.visit.patient.firstName} {sample.visit.patient.lastName}
+                    </h3>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {sample.visit.visitId} · {sample.specimenType.replaceAll("_", " ")} · {sample.container}
+                    </p>
+                    <p className="mt-2 text-sm text-slate-600">
+                      Tests: {sample.testOrders.map((order) => order.testCatalog.code).join(", ")}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <StatusBadge status={sample.visit.urgency} />
@@ -109,8 +114,8 @@ export function PreanalyticsQueuePage() {
               </div>
 
               <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-center">
-                <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                  Collected {formatDate(sample.collectedAt ?? sample.visit.registeredAt)} · Current stage {sample.status.replaceAll("_", " ")}
+                <div className="flex items-center gap-2 rounded-2xl bg-white/60 px-4 py-3 text-sm text-slate-600">
+                  <span>📅</span> Collected {formatDate(sample.collectedAt ?? sample.visit.registeredAt)} · Current stage <strong>{sample.status.replaceAll("_", " ")}</strong>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {(statusActions[sample.status] ?? []).map((action) => (
