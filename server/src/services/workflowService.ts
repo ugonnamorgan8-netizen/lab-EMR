@@ -277,7 +277,7 @@ export async function listPreanalyticsSamples() {
         in: [...PREANALYTICS_STATUSES],
       },
     },
-    orderBy: [{ visit: { urgency: "desc" } }, { collectedAt: "asc" }],
+    orderBy: [{ visit: { urgency: "desc" } }, { collectedAt: "desc" }],
     include: {
       visit: {
         include: {
@@ -346,7 +346,7 @@ export async function listProcessingWorklist() {
         in: [OrderStatus.PENDING, OrderStatus.IN_ANALYSIS, OrderStatus.RESULTED],
       },
     },
-    orderBy: [{ tatDeadline: "asc" }, { orderedAt: "asc" }],
+    orderBy: [{ urgency: "desc" }, { tatDeadline: "asc" }, { orderedAt: "desc" }],
     include: {
       sample: {
         include: {
@@ -743,7 +743,7 @@ export async function listValidationQueue() {
         in: [ResultStatus.ENTERED, ResultStatus.AMENDED, ResultStatus.DELTA_CHECK_FAILED, ResultStatus.QC_FAILED],
       },
     },
-    orderBy: [{ enteredAt: "asc" }, { createdAt: "asc" }],
+    orderBy: [{ enteredAt: "desc" }, { createdAt: "desc" }],
     include: {
       values: {
         include: {
@@ -1226,10 +1226,10 @@ export async function getVisitResults(visitId: string) {
                   },
                 },
               },
-              orderBy: [{ orderedAt: "asc" }],
+              orderBy: [{ orderedAt: "desc" }],
             },
           },
-          orderBy: [{ createdAt: "asc" }],
+          orderBy: [{ createdAt: "desc" }],
         },
       },
     }),

@@ -12,6 +12,8 @@ export type NavItem = {
   label: string;
   to: string;
   badge?: string | number;
+  icon?: string;
+  colorKey?: "sky" | "teal" | "violet" | "amber" | "emerald" | "green" | "rose" | "orange" | "indigo" | "slate" | "purple";
 };
 
 export type PatientSummary = {
