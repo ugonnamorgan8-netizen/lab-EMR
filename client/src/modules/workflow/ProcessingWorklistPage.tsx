@@ -198,9 +198,27 @@ export function ProcessingWorklistPage() {
       />
 
       <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard label="Pending tests" value={pending} hint="Orders not yet started on the bench" />
-        <MetricCard label="In analysis" value={inAnalysis} hint="Orders currently under active bench work" />
-        <MetricCard label="Ready for review" value={resulted} hint="Orders with results that can move to validation" />
+        <MetricCard
+          label="Pending tests"
+          value={pending}
+          hint="Orders not yet started on the bench"
+          icon="⏳"
+          variant="amber"
+        />
+        <MetricCard
+          label="In analysis"
+          value={inAnalysis}
+          hint="Orders currently under active bench work"
+          icon="⚗️"
+          variant="violet"
+        />
+        <MetricCard
+          label="Ready for review"
+          value={resulted}
+          hint="Orders with results that can move to validation"
+          icon="✅"
+          variant="emerald"
+        />
       </div>
 
       {orders.data.length === 0 ? (

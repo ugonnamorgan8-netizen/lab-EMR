@@ -1,6 +1,8 @@
 import { roles, userStatuses } from "@shared/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { MetricCard } from "../../components/shared/MetricCard";
+import { PageHero } from "../../components/shared/PageHero";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
@@ -37,14 +39,12 @@ function passwordChecks(password: string) {
   };
 }
 
-function SummaryCard({ label, value }: { label: string; value: number }) {
-  return (
-    <Card>
-      <p className="text-sm text-slate-500">{label}</p>
-      <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
-    </Card>
-  );
-}
+const ROLE_ICONS: Record<string, string> = {
+  RECEPTIONIST: "📋",
+  ACCOUNTS: "💼",
+  LAB_SCIENTIST: "🔬",
+  SUPERVISOR: "🛡️",
+};
 
 function downloadArchive(user: AdminUserRecord, response: DeleteAdminUserResponse) {
   if (!response.archive) {
@@ -148,19 +148,31 @@ export function AdminUsersPage() {
     createUser.isPending;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      <PageHero
+        eyebrow="System Administration"
+        title="User management"
+        description="Create, update, reassign, and remove system accounts. All changes are audit-logged and take effect immediately."
+        aside={<div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-slate-100">Users: {usersQuery.data.totals.total}</div>}
+      />
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard label="Total users" value={usersQuery.data.totals.total} />
-        <SummaryCard label="Active" value={usersQuery.data.totals.active} />
-        <SummaryCard label="Inactive" value={usersQuery.data.totals.inactive} />
-        <SummaryCard label="Suspended" value={usersQuery.data.totals.suspended} />
+        <MetricCard label="Total users" value={usersQuery.data.totals.total} hint="All accounts in the system" icon="🧑‍💻" variant="blue" />
+        <MetricCard label="Active" value={usersQuery.data.totals.active} hint="Accounts currently signed in or enabled" icon="✅" variant="emerald" />
+        <MetricCard label="Inactive" value={usersQuery.data.totals.inactive} hint="Disabled or dormant accounts" icon="💤" variant="slate" />
+        <MetricCard label="Suspended" value={usersQuery.data.totals.suspended} hint="Accounts pending review or locked" icon="🔒" variant="rose" />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[0.92fr_1.08fr]">
-        <Card className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold text-slate-900">Create account</h3>
-            <p className="text-sm text-slate-500">Supervisors can create accounts with immediate access and place them into any supported role. Use a strong password with uppercase, lowercase, number, and symbol.</p>
+        <Card variant="gradient" className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-700 text-xl text-white shadow">
+              ➕
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900">Create account</h3>
+              <p className="text-sm text-slate-500">Supervisors can create accounts with immediate access and place them into any supported role.</p>
+            </div>
           </div>
 
           <div className="grid gap-3">
@@ -247,15 +259,20 @@ export function AdminUsersPage() {
           {createUser.error ? <p className="text-sm text-brand-red">{createUser.error.message}</p> : null}
         </Card>
 
-        <Card className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold text-slate-900">Role coverage</h3>
-            <p className="text-sm text-slate-500">Current user distribution across departments and functions.</p>
+        <Card variant="gradient" className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-700 text-xl text-white shadow">
+              🏛️
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900">Role coverage</h3>
+              <p className="text-sm text-slate-500">Current user distribution across departments and functions.</p>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             {rolesInUse.map(([role, count]) => (
               <Badge key={role} className="bg-slate-100 text-slate-700">
-                {role.replaceAll("_", " ")}: {count}
+                {ROLE_ICONS[role] ?? "👤"} {role.replaceAll("_", " ")}: {count}
               </Badge>
             ))}
           </div>
@@ -265,10 +282,15 @@ export function AdminUsersPage() {
         </Card>
       </div>
 
-      <Card className="space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold text-slate-900">User directory</h3>
-          <p className="text-sm text-slate-500">Supervisors can adjust roles, statuses, departments, and remove accounts from here.</p>
+      <Card variant="gradient" className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-blue-700 text-xl text-white shadow">
+            👥
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900">User directory</h3>
+            <p className="text-sm text-slate-500">Supervisors can adjust roles, statuses, departments, and remove accounts from here.</p>
+          </div>
         </div>
         {usersQuery.data.users.length === 0 ? (
           <EmptyState title="No users found" message="Created accounts will appear here." />
@@ -284,14 +306,19 @@ export function AdminUsersPage() {
                 draft.role !== user.role || draft.status !== user.status || draft.department !== (user.department ?? "");
 
               return (
-                <div key={user.id} className="rounded-xl border border-brand-border p-4">
+                <div key={user.id} className="rounded-2xl border border-brand-border bg-white/70 p-4 shadow-sm transition-all duration-150 hover:shadow-md">
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                      <div>
-                        <p className="font-semibold text-slate-900">{user.name}</p>
-                        <p className="text-sm text-slate-500 break-all">
-                          {user.email} / created {formatDate(user.createdAt)} / last login {user.lastLogin ? formatDate(user.lastLogin) : "Not signed in yet"}
-                        </p>
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-700 text-xl text-white shadow">
+                          {ROLE_ICONS[user.role] ?? "🧑"}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-900">{user.name}</p>
+                          <p className="text-sm text-slate-500 break-all">
+                            {user.email} · created {formatDate(user.createdAt)} · last login {user.lastLogin ? formatDate(user.lastLogin) : "Not signed in yet"}
+                          </p>
+                        </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <Badge className="bg-blue-100 text-brand-blue">{user.role.replaceAll("_", " ")}</Badge>

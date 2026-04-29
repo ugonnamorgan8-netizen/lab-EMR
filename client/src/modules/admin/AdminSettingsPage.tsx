@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { MetricCard } from "../../components/shared/MetricCard";
 import { PageHero } from "../../components/shared/PageHero";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
@@ -69,33 +70,23 @@ export function AdminSettingsPage() {
 
       {!isScientistRoute ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          <Card>
-            <p className="text-sm text-slate-500">Users</p>
-            <p className="mt-2 text-2xl font-bold text-slate-900">{settingsQuery.data.footprint.userCount}</p>
-          </Card>
-          <Card>
-            <p className="text-sm text-slate-500">Patients</p>
-            <p className="mt-2 text-2xl font-bold text-slate-900">{settingsQuery.data.footprint.patientCount}</p>
-          </Card>
-          <Card>
-            <p className="text-sm text-slate-500">Catalog tests</p>
-            <p className="mt-2 text-2xl font-bold text-slate-900">{settingsQuery.data.footprint.catalogCount}</p>
-          </Card>
-          <Card>
-            <p className="text-sm text-slate-500">Panels</p>
-            <p className="mt-2 text-2xl font-bold text-slate-900">{settingsQuery.data.footprint.panelCount}</p>
-          </Card>
-          <Card>
-            <p className="text-sm text-slate-500">Audit records</p>
-            <p className="mt-2 text-2xl font-bold text-slate-900">{settingsQuery.data.footprint.auditCount}</p>
-          </Card>
+          <MetricCard label="Users" value={settingsQuery.data.footprint.userCount} hint="Total system accounts" icon="🧑‍💻" variant="blue" />
+          <MetricCard label="Patients" value={settingsQuery.data.footprint.patientCount} hint="Registered patient records" icon="👥" variant="teal" />
+          <MetricCard label="Catalog tests" value={settingsQuery.data.footprint.catalogCount} hint="Tests in the active catalog" icon="🗃️" variant="violet" />
+          <MetricCard label="Panels" value={settingsQuery.data.footprint.panelCount} hint="Defined test panels" icon="📂" variant="amber" />
+          <MetricCard label="Audit records" value={settingsQuery.data.footprint.auditCount} hint="Logged operational events" icon="🔍" variant="indigo" />
         </div>
       ) : null}
 
-      <Card className="space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold text-slate-900">Lab configuration</h3>
-          <p className="text-sm text-slate-500">Facility identity, report branding, and contact information live here and feed the printable result output.</p>
+      <Card variant="gradient" className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-slate-500 to-slate-700 text-xl text-white shadow">
+            ⚙️
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900">Lab configuration</h3>
+            <p className="text-sm text-slate-500">Facility identity, report branding, and contact information live here and feed the printable result output.</p>
+          </div>
         </div>
         {visibleSettings.length === 0 ? (
           <EmptyState title="No settings found" message="Seeded system settings will appear here." />
@@ -106,7 +97,7 @@ export function AdminSettingsPage() {
               const isDirty = draftValue !== setting.value;
 
               return (
-                <div key={setting.key} className="rounded-xl border border-brand-border p-3">
+                <div key={setting.key} className="rounded-2xl border border-brand-border bg-white/70 p-3 shadow-sm">
                   <div className="flex flex-col gap-3">
                     <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                       <div>

@@ -93,10 +93,26 @@ export function Topbar({
           <button
             type="button"
             onClick={onLogout}
-            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-brand-border bg-white/80 text-xl shadow-sm transition-all duration-150 hover:scale-105 hover:bg-rose-50 hover:border-rose-300 hover:shadow-md md:h-12 md:w-12"
-            title="Logout"
+            className="group flex h-10 w-10 items-center justify-center rounded-2xl border border-brand-border bg-white/80 shadow-sm transition-all duration-150 hover:scale-105 hover:bg-rose-50 hover:border-rose-400 hover:shadow-md md:h-12 md:w-12"
+            title="Sign out"
           >
-            🚪
+            {/* Sign-out arrow (arrow → from bracket) */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-5 w-5 text-slate-500 transition-colors duration-150 group-hover:text-rose-600 md:h-6 md:w-6"
+            >
+              {/* Vertical bar on the left */}
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              {/* Arrow pointing right */}
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
           </button>
         </div>
       </div>
