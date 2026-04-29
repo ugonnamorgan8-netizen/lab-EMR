@@ -21,19 +21,24 @@ export function Topbar({
   const activeUsers = usePresenceStore((state) => state.activeUsers);
 
   return (
-    <header className="sticky top-0 z-20 border-b border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),rgba(247,251,255,0.92))] px-4 py-4 backdrop-blur md:px-6">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        <div className="flex items-center gap-3">
-          <BrandLogo src={appBrand.logoPath} alt={appBrand.labName} size="sm" className="md:hidden" imageClassName="h-8 w-8" />
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-brand-blue">{appBrand.shortName}</p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">{title}</h2>
-            <p className="mt-1 text-sm text-slate-500">{subtitle || appBrand.labName}</p>
+    <header className="sticky top-0 z-20 border-b border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),rgba(247,251,255,0.92))] px-4 py-2 backdrop-blur md:px-6 md:py-4">
+      {/* ── Single compact row on mobile, expands to two-section row on desktop ── */}
+      <div className="flex items-center justify-between gap-3">
+
+        {/* Left: logo (mobile only) + title */}
+        <div className="flex min-w-0 items-center gap-3">
+          <BrandLogo src={appBrand.logoPath} alt={appBrand.labName} size="sm" className="md:hidden shrink-0" imageClassName="h-8 w-8" />
+          <div className="min-w-0">
+            <p className="hidden text-xs font-semibold uppercase tracking-[0.28em] text-brand-blue md:block">{appBrand.shortName}</p>
+            <h2 className="truncate text-base font-semibold tracking-tight text-slate-900 md:text-2xl">{title}</h2>
+            <p className="truncate text-xs text-slate-500 md:text-sm">{subtitle || appBrand.labName}</p>
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-          <div className="grid gap-3 sm:grid-cols-2">
+        {/* Right: info cards (desktop only) + action buttons */}
+        <div className="flex shrink-0 items-center gap-2 md:gap-3">
+          {/* Info cards — hidden on mobile, shown side-by-side on md+ */}
+          <div className="hidden gap-3 md:flex">
             <div className="rounded-2xl border border-brand-border bg-white/80 px-4 py-3 text-left shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brand-blue">Signed in</p>
               <p className="mt-1 text-sm font-semibold text-slate-900">{userName}</p>
@@ -47,14 +52,14 @@ export function Topbar({
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="secondary" className="px-4" onClick={() => setOpen(true)}>
-              Alerts
-            </Button>
-            <Button variant="secondary" onClick={onLogout}>
-              Logout
-            </Button>
-          </div>
+
+          {/* Action buttons — always visible */}
+          <Button variant="secondary" className="px-3 text-xs md:px-4 md:text-sm" onClick={() => setOpen(true)}>
+            Alerts
+          </Button>
+          <Button variant="secondary" className="text-xs md:text-sm" onClick={onLogout}>
+            Logout
+          </Button>
         </div>
       </div>
     </header>
