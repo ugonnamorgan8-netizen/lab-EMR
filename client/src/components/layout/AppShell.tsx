@@ -4,6 +4,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useSocket } from "../../hooks/useSocket";
 import { BottomTabBar } from "./BottomTabBar";
 import { NotificationDrawer } from "./NotificationDrawer";
+import { NotificationToast } from "./NotificationToast";
 import { PatientContextBanner } from "./PatientContextBanner";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
@@ -29,6 +30,7 @@ export function AppShell({
       </div>
       <BottomTabBar items={navItems} />
       <NotificationDrawer />
+      <NotificationToast />
     </div>
   );
 }

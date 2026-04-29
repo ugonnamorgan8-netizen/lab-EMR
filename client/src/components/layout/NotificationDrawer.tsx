@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../services/api";
 import { queryKeys } from "../../services/queryKeys";
@@ -11,6 +12,12 @@ export function NotificationDrawer() {
   const setOpen = useNotificationStore((state) => state.setOpen);
   const items = useNotificationStore((state) => state.items);
   const setItems = useNotificationStore((state) => state.setItems);
+  const clearUnread = useNotificationStore((state) => state.clearUnread);
+
+  // Reset badge count whenever the drawer becomes visible
+  useEffect(() => {
+    if (open) clearUnread();
+  }, [open, clearUnread]);
 
   useQuery({
     queryKey: queryKeys.notifications(),

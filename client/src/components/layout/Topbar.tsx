@@ -18,7 +18,14 @@ export function Topbar({
   onLogout: () => void;
 }) {
   const setOpen = useNotificationStore((state) => state.setOpen);
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
+  const clearUnread = useNotificationStore((state) => state.clearUnread);
   const activeUsers = usePresenceStore((state) => state.activeUsers);
+
+  function handleAlertsClick() {
+    clearUnread();
+    setOpen(true);
+  }
 
   return (
     <header className="sticky top-0 z-20 border-b border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),rgba(247,251,255,0.92))] px-4 py-2 backdrop-blur md:px-6 md:py-4">
@@ -54,9 +61,16 @@ export function Topbar({
           </div>
 
           {/* Action buttons — always visible */}
-          <Button variant="secondary" className="px-3 text-xs md:px-4 md:text-sm" onClick={() => setOpen(true)}>
-            Alerts
-          </Button>
+          <span className="relative">
+            <Button variant="secondary" className="px-3 text-xs md:px-4 md:text-sm" onClick={handleAlertsClick}>
+              Alerts
+            </Button>
+            {unreadCount > 0 && (
+              <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-red text-[10px] font-bold text-white ring-2 ring-white animate-pulse">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+          </span>
           <Button variant="secondary" className="text-xs md:text-sm" onClick={onLogout}>
             Logout
           </Button>

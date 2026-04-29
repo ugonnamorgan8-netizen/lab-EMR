@@ -13,6 +13,7 @@ const socket = io(socketUrl, { autoConnect: false, withCredentials: true });
 export function useSocket() {
   const user = useAuthStore((state) => state.user);
   const pushItem = useNotificationStore((state) => state.pushItem);
+  const setToast = useNotificationStore((state) => state.setToast);
   const setActiveUsers = usePresenceStore((state) => state.setActiveUsers);
   const resetPresence = usePresenceStore((state) => state.reset);
 
@@ -32,6 +33,9 @@ export function useSocket() {
 
     socket.on("notification:new", (event) => {
       pushItem(event.notification);
+      // Show floating toast, auto-dismiss after 4 s
+      setToast(event.notification);
+      setTimeout(() => setToast(null), 4000);
     });
     socket.on("presence:update", (event: { activeUsers: number }) => {
       setActiveUsers(event.activeUsers);
@@ -41,5 +45,5 @@ export function useSocket() {
       socket.off("notification:new");
       socket.off("presence:update");
     };
-  }, [pushItem, resetPresence, setActiveUsers, user]);
+  }, [pushItem, resetPresence, setActiveUsers, setToast, user]);
 }
