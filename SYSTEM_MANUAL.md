@@ -116,6 +116,7 @@ Users log in through the login page. The frontend stores the returned access tok
 - backend API access is also restricted by role middleware
 - every dashboard header shows the signed-in account name and role
 - the dashboard header also shows a live count of currently connected accounts
+- the Alerts button in the header shows a red unread badge when new notifications are waiting
 - logout calls the auth logout endpoint and clears the local session
 
 For live use, login credentials should be created and managed by a supervisor from the user administration screen. The login page itself no longer displays seeded demo credentials.
@@ -666,22 +667,72 @@ What it shows:
 
 ## 17. Notifications and real-time behavior
 
-The system includes:
+The system includes a full real-time notification layer visible to all logged-in users.
 
-- a notification drawer in the main shell
-- notification list loading from `/api/notifications`
-- Socket.IO subscription by user, role, and department
-- a live connected-account count in the dashboard header
-- mobile navigation that exposes the full role-specific section list through the bottom navigation rail
+### Alerts button badge
+
+- The **Alerts** button in the top header shows a pulsing red circle badge with the unread notification count whenever there are unread items
+- The count is calculated on initial page load from items returned by `/api/notifications` that have `read: false`
+- Each new notification pushed via Socket.IO increments the count by one
+- The badge resets to zero immediately when the user clicks Alerts and the notification drawer opens
+- The count caps at `99+` if more than 99 unread items are present
+
+### Floating toast pop-up
+
+- When a new notification arrives via WebSocket while the user is on any page, a floating toast slides in from the top-right corner of the screen
+- The toast displays the notification title, message, and a bell icon
+- A blue progress bar at the bottom of the toast shrinks over 4 seconds, matching the auto-dismiss timer
+- The toast can be dismissed early by clicking the ✕ button or pressing `Escape`
+- The toast does not block the rest of the interface while it is visible
+
+### Notification drawer
+
+- Clicking Alerts opens the notification drawer from the right side of the screen
+- The drawer lists all notifications in reverse chronological order
+- Opening the drawer resets the unread badge count to zero
+- Closing the drawer returns the user to the current page without navigation
+
+### Socket.IO real-time connection
 
 When a user is logged in:
 
-- the client connects to the socket server
-- the client joins rooms for that user ID
-- the client joins rooms for that role
-- the client joins a department room if one is set
-- new notifications are pushed into the drawer in real time
-- the server publishes a real-time connected-user snapshot to all open dashboards
+- the client connects to the Socket.IO server
+- the client joins a room for that user's ID
+- the client joins a room for that user's role
+- the client joins a department room if one is set on the account
+- new notifications are pushed into the drawer and trigger the floating toast in real time
+- the server publishes a real-time connected-user count to all open dashboards
+- the live user count in the header updates automatically without a page refresh
+
+## 17A. UI layout and mobile behavior
+
+### Desktop layout
+
+On screens wider than 768 px (`md` breakpoint):
+
+- the left sidebar is visible and shows the lab logo, name, address, and the full navigation menu for the current role
+- the top header shows the lab short name, current page title, a Signed-in card with the user name and role, an Online now card with the connected account count, and the Alerts and Logout buttons
+- the bottom navigation rail is hidden
+
+### Mobile layout
+
+On screens narrower than 768 px:
+
+- the sidebar is hidden
+- the top header collapses to a single compact row approximately 56 px tall:
+  - left side: small lab logo, page title, and role subtitle (truncated if necessary)
+  - right side: compact Alerts button (with unread badge if applicable) and Logout button
+  - the Signed-in and Online now info cards are hidden to preserve screen space
+- the bottom navigation rail appears at the very bottom of the viewport and shows the role-specific navigation links as horizontal scrollable tabs
+- the content area fills the remaining height between the header and the bottom rail
+
+### Sidebar navigation states
+
+The sidebar navigation items use a color inversion effect:
+
+- **Default state**: item has a subtle semi-transparent background and white text
+- **Hover state**: hovering any inactive item temporarily inverts colors (white background, dark text) for the duration of the hover only; the inversion disappears when the cursor leaves
+- **Active/selected state**: the currently selected route item maintains a persistent white background with dark text using CSS `!important` to prevent any hover rule from overriding it, regardless of CSS cascade order; the selected item stays inverted even after the cursor moves away
 
 ## 18. Core record types in the data model
 
