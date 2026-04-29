@@ -23,15 +23,24 @@ export function LoginPage() {
       <Card className="w-full max-w-md p-6">
         <div className="flex flex-col items-center text-center">
           <BrandLogo src={appBrand.logoPath} alt={appBrand.labName} size="lg" />
-          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-brand-blue">{appBrand.labName}</p>
-          <p className="mt-2 text-sm text-slate-500">{appBrand.loginTagline}</p>
-          <div className="mt-3 space-y-1 text-xs leading-5 text-slate-500">
+
+          {/* Lab name — larger, prominent */}
+          <p className="mt-4 text-3xl font-bold uppercase tracking-wide text-brand-blue leading-tight">
+            {appBrand.labName}
+          </p>
+
+          {/* Tagline — one comfortable step below the name */}
+          <p className="mt-1 text-sm text-slate-500">{appBrand.loginTagline}</p>
+
+          {/* Address block — tighter line spacing, all on one compact block */}
+          <div className="mt-2 text-xs leading-[1.3] text-slate-400">
             <p>{appBrand.address}</p>
-            <p>{appBrand.email} / {appBrand.phone}</p>
+            <p>{appBrand.email} &middot; {appBrand.phone}</p>
             <p>{appBrand.website}</p>
           </div>
         </div>
-        <h1 className="mt-4 text-2xl font-bold text-slate-900">Welcome back</h1>
+
+        <h1 className="mt-5 text-2xl font-bold text-slate-900">Welcome back</h1>
         <form className="mt-6 space-y-4" onSubmit={handleSubmit((values) => login.mutate(values))}>
           <Input label="Email" {...register("email")} error={formState.errors.email?.message} />
           <Input label="Password" type="password" {...register("password")} error={formState.errors.password?.message} />

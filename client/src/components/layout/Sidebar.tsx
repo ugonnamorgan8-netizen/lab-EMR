@@ -28,10 +28,19 @@ export function Sidebar({ items }: { items: NavItem[] }) {
             to={item.to}
             className={({ isActive }) =>
               cn(
-                "flex items-center justify-between rounded-2xl border border-transparent bg-slate-950/12 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/18 hover:bg-slate-950/20",
+                // ── Shared base ─────────────────────────────────────────────
+                "flex items-center justify-between rounded-2xl border px-4 py-3 text-sm font-semibold transition duration-150",
                 isActive
-                  ? "border-white/24 bg-white text-slate-900 shadow-[0_16px_34px_rgba(7,24,48,0.2)] hover:text-slate-900"
-                  : "hover:text-white",
+                  ? // ── Selected (persistent inversion) ─────────────────────
+                    // Use Tailwind's ! (important) modifier so the active
+                    // bg/text can NEVER be overridden by any hover rule.
+                    // This is the fix: !bg-white and !text-slate-900 beat
+                    // every other class regardless of CSS order.
+                    "border-white/20 !bg-white !text-slate-900 shadow-[0_16px_34px_rgba(7,24,48,0.2)]"
+                  : // ── Inactive (hover inversion only) ──────────────────────
+                    // No bg/text set at rest — only on :hover.
+                    // Disappears naturally when cursor leaves (pure CSS :hover).
+                    "border-transparent bg-white/10 text-white hover:border-white/20 hover:bg-white hover:text-slate-900",
               )
             }
           >
@@ -41,10 +50,10 @@ export function Sidebar({ items }: { items: NavItem[] }) {
                 {item.badge ? (
                   <span
                     className={cn(
-                      "rounded-full border px-2 py-0.5 text-xs",
+                      "rounded-full border px-2 py-0.5 text-xs transition duration-150",
                       isActive
                         ? "border-brand-blue/30 bg-brand-blue/10 text-brand-blue"
-                        : "border-white/20 bg-slate-950/18 text-white",
+                        : "border-white/20 bg-white/10 text-white",
                     )}
                   >
                     {item.badge}
