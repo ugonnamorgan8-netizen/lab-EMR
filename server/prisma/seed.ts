@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { PrismaClient } from "@prisma/client";
 // Enum string literals (inlined to avoid runtime import issues)
 import { pathToFileURL } from "node:url";
+import { Urgency } from "@shared/index.js";
 
 export const prisma = new PrismaClient();
 
