@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { createPatientHandler, getPatientHandler, listPatientsHandler, searchPatientsHandler } from "../controllers/patientController.js";
-import { Role } from "@prisma/client";
+import { Role } from "@shared/index";
 import { requireRole } from "../middleware/rbac.js";
 
 export const patientRouter = Router();

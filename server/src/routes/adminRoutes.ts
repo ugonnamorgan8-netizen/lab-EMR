@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client";
+import { Role } from "@shared/index";
 import { Router } from "express";
 import {
   createAdminCatalogParameterHandler,

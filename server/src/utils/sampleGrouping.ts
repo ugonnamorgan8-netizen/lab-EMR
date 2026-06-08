@@ -1,4 +1,5 @@
-import type { SpecimenType, TestCatalog } from "@prisma/client";
+import type { TestCatalog } from "@prisma/client";
+import type { SpecimenType } from "@shared/index";
 
 export type GroupedSample = {
   specimenType: SpecimenType;
@@ -11,7 +12,8 @@ export function groupTestsBySample(tests: TestCatalog[]) {
   const grouped = new Map<string, GroupedSample>();
 
   tests.forEach((test) => {
-    const specimenType = test.specimenTypes[0] ?? "OTHER";
+    const specimenTypesArr: string[] = JSON.parse((test.specimenTypes as string) || "[]");
+    const specimenType = (specimenTypesArr[0] ?? "OTHER") as SpecimenType;
     const key = `${specimenType}:${test.container}`;
     const existing = grouped.get(key);
 

@@ -1,4 +1,5 @@
-import type { TestCatalog, Urgency } from "@prisma/client";
+import type { TestCatalog } from "@prisma/client";
+import type { Urgency } from "@shared/index";
 
 export function calculateTatDeadline(test: TestCatalog, urgency: Urgency, startAt = new Date()) {
   const hours =

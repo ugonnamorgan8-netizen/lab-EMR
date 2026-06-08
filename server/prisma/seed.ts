@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import dayjs from "dayjs";
-import { PrismaClient, Role, SampleStatus, Urgency, VisitStatus } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import { Role, SampleStatus, Urgency, VisitStatus } from "@shared/index";
 import { pathToFileURL } from "node:url";
 
 export const prisma = new PrismaClient();
@@ -29,7 +30,7 @@ const patients = Array.from({ length: 20 }).map((_, index) => ({
   referringDoctor: index % 2 === 0 ? "Dr. Bello" : "Dr. Uche",
   referringFacility: index % 2 === 0 ? "Prime Clinic" : "Wellness Centre",
   clinicalHistory: "Routine laboratory assessment",
-  allergies: index % 4 === 0 ? ["Penicillin"] : [],
+  allergies: JSON.stringify(index % 4 === 0 ? ["Penicillin"] : []),
 }));
 
 const catalogSeed = [
@@ -216,15 +217,15 @@ export async function seedDemoData() {
 
   await prisma.systemSetting.createMany({
     data: [
-      { key: "lab.name", value: "ST. DAVID MEDICAL DIAGNOSTIC CENTRE" },
-      { key: "lab.address", value: "BERLIN PLAZA #NO 110 OGUI ROAD ENUGU STATE NIGERIA" },
-      { key: "lab.phone", value: "08100094967" },
-      { key: "lab.email", value: "info@stdavidmedicaldiagnostic.org.ng" },
-      { key: "lab.website", value: "www.stdavidmedicaldiagnostic.org.ng" },
-      { key: "lab.director", value: "Dr. Ifeoma Balogun, FMCPath" },
-      { key: "lab.accreditation", value: "MLSCN-ACC-2026-014" },
-      { key: "lab.tagline", value: "Excellence in Diagnostic Services" },
-      { key: "lab.logoUrl", value: "/lab-logo.jpeg" },
+      { key: "lab.name", value: "PHENOM LABS" },
+      { key: "lab.address", value: "Africa" },
+      { key: "lab.phone", value: "" },
+      { key: "lab.email", value: "hello@phenomlabs.com" },
+      { key: "lab.website", value: "phenomlabs.com" },
+      { key: "lab.director", value: "" },
+      { key: "lab.accreditation", value: "" },
+      { key: "lab.tagline", value: "We Build, Teach and Automate with AI." },
+      { key: "lab.logoUrl", value: "/favicon.svg" },
     ],
   });
 
@@ -241,7 +242,7 @@ export async function seedDemoData() {
         name: catalog.name,
         category: catalog.category as never,
         department: catalog.department,
-        specimenTypes: catalog.specimenTypes as never,
+        specimenTypes: JSON.stringify(catalog.specimenTypes),
         container: catalog.container,
         sampleVolume: catalog.sampleVolume,
         price: catalog.price,
@@ -479,7 +480,7 @@ export async function seedDemoData() {
           generatedAt: dayjs().subtract(1, "hour").toDate(),
           dispatchedAt: visit.status === VisitStatus.DISPATCHED ? dayjs().toDate() : null,
           dispatchedById: visit.status === VisitStatus.DISPATCHED ? supervisor.id : null,
-          deliveryMethod: visit.status === VisitStatus.DISPATCHED ? ["PRINT", "EMAIL"] : [],
+          deliveryMethod: JSON.stringify(visit.status === VisitStatus.DISPATCHED ? ["PRINT", "EMAIL"] : []),
           status: visit.status === VisitStatus.DISPATCHED ? "DISPATCHED" : "GENERATED",
           pdfUrl: `/reports/${visit.visitId}.pdf`,
         },
@@ -492,7 +493,7 @@ export async function seedDemoData() {
         action: "CREATE_VISIT",
         resourceType: "Visit",
         resourceId: visit.id,
-        metadata: { visitId: visit.visitId, status: visit.status },
+        metadata: JSON.stringify({ visitId: visit.visitId, status: visit.status }),
       },
     });
   }

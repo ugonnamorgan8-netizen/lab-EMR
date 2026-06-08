@@ -2,13 +2,14 @@ import { prisma } from "../lib/prisma.js";
 import type { PatientRegistrationInput } from "../../../shared/types/index.js";
 
 export async function searchPatients(query: string) {
+  // SQLite does not support "insensitive" mode; use contains with lowercase workaround
   return prisma.patient.findMany({
     where: {
       OR: [
-        { patientId: { contains: query, mode: "insensitive" } },
-        { phone: { contains: query, mode: "insensitive" } },
-        { firstName: { contains: query, mode: "insensitive" } },
-        { lastName: { contains: query, mode: "insensitive" } },
+        { patientId: { contains: query } },
+        { phone: { contains: query } },
+        { firstName: { contains: query } },
+        { lastName: { contains: query } },
       ],
     },
     orderBy: { createdAt: "desc" },
@@ -31,6 +32,7 @@ export async function createPatient(input: PatientRegistrationInput) {
       email: rest.email || null,
       patientId: laboratoryNumber.trim(),
       dateOfBirth: new Date(rest.dateOfBirth),
+      allergies: JSON.stringify(rest.allergies ?? []),
     },
   });
 }

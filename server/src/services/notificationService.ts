@@ -1,4 +1,4 @@
-import type { NotificationType } from "@prisma/client";
+import type { NotificationType } from "@shared/index";
 import { prisma } from "../lib/prisma.js";
 import { getIo } from "../socket/socket.js";
 

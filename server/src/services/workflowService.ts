@@ -1,4 +1,5 @@
-import { DeliveryMethod, OrderStatus, QCRule, ReportStatus, ResultFlag, ResultStatus, SampleStatus, type Prisma } from "@prisma/client";
+import { type Prisma } from "@prisma/client";
+import { DeliveryMethod, OrderStatus, QCRule, ReportStatus, ResultFlag, ResultStatus, SampleStatus } from "@shared/index";
 import type {
   DispatchReportInput,
   EditResultInput,
@@ -1257,7 +1258,7 @@ export async function getVisitResults(visitId: string) {
 
   return {
     lab: {
-      name: settingsMap["lab.name"] ?? "ST. DAVID MEDICAL DIAGNOSTIC CENTRE",
+      name: settingsMap["lab.name"] ?? "PHENOM LABS",
       address: settingsMap["lab.address"] ?? "",
       phone: settingsMap["lab.phone"] ?? "",
       email: settingsMap["lab.email"] ?? "",

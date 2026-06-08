@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { getInvoiceHandler, recordPaymentHandler } from "../controllers/billingController.js";
-import { Role } from "@prisma/client";
+import { Role } from "@shared/index";
 import { requireRole } from "../middleware/rbac.js";
 
 export const billingRouter = Router();

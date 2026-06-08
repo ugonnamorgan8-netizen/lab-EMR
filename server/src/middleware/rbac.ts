@@ -1,5 +1,5 @@
 import type { NextFunction, Response } from "express";
-import type { Role } from "@prisma/client";
+import type { Role } from "@shared/index";
 import type { AuthenticatedRequest } from "../types.js";
 
 export function requireRole(allowedRoles: Role[]) {

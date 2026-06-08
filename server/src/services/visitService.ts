@@ -1,4 +1,5 @@
-import { Prisma, type VisitStatus } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { type VisitStatus } from "@shared/index";
 import type { CreateVisitInput } from "../../../shared/types/index.js";
 import { prisma } from "../lib/prisma.js";
 import { getIo } from "../socket/socket.js";

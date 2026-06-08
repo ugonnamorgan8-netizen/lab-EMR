@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { collectSampleHandler, getSampleHandler, listSamplesHandler } from "../controllers/sampleController.js";
-import { Role } from "@prisma/client";
+import { Role } from "@shared/index";
 import { requireRole } from "../middleware/rbac.js";
 
 export const sampleRouter = Router();

@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -12,9 +12,9 @@ model User {
   name             String
   email            String       @unique
   passwordHash     String
-  role             Role
+  role             String
   department       String?
-  status           UserStatus   @default(ACTIVE)
+  status           String       @default("ACTIVE")
   lastLogin        DateTime?
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
@@ -23,19 +23,6 @@ model User {
   validatedResults TestResult[] @relation("ValidatedBy")
   dispatchedReports Report[]    @relation("DispatchedBy")
   qcEntries        QCEntry[]
-}
-
-enum Role {
-  RECEPTIONIST
-  ACCOUNTS
-  LAB_SCIENTIST
-  SUPERVISOR
-}
-
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
 }
 
 model Patient {
@@ -56,7 +43,7 @@ model Patient {
   referringDoctor   String?
   referringFacility String?
   clinicalHistory   String?
-  allergies         String[]
+  allergies         String    @default("[]")
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   visits            Visit[]
@@ -68,40 +55,17 @@ model Visit {
   visitId           String      @unique
   patientId         String
   patient           Patient     @relation(fields: [patientId], references: [id])
-  type              VisitType   @default(WALK_IN)
+  type              String      @default("WALK_IN")
   referralLetter    String?
   referringDoctor   String?
   referringFacility String?
   clinicalHistory   String?
-  urgency           Urgency     @default(ROUTINE)
-  status            VisitStatus @default(REGISTERED)
+  urgency           String      @default("ROUTINE")
+  status            String      @default("REGISTERED")
   registeredAt      DateTime    @default(now())
   samples           Sample[]
   invoice           Invoice?
   report            Report?
-}
-
-enum VisitType {
-  WALK_IN
-  REFERRAL
-  CORPORATE
-  HOME_COLLECTION
-}
-
-enum VisitStatus {
-  REGISTERED
-  SAMPLE_COLLECTED
-  IN_PROCESSING
-  AWAITING_QC
-  VALIDATED
-  DISPATCHED
-  CANCELLED
-}
-
-enum Urgency {
-  ROUTINE
-  URGENT
-  STAT
 }
 
 model Sample {
@@ -109,57 +73,17 @@ model Sample {
   specimenId    String          @unique
   visitId       String
   visit         Visit           @relation(fields: [visitId], references: [id])
-  specimenType  SpecimenType
+  specimenType  String
   volume        Float?
   container     String
   collectedById String?
   collectedBy   User?           @relation("CollectedBy", fields: [collectedById], references: [id])
   collectedAt   DateTime?
-  condition     SampleCondition @default(ACCEPTABLE)
+  condition     String          @default("ACCEPTABLE")
   conditionNote String?
-  status        SampleStatus    @default(PENDING_COLLECTION)
+  status        String          @default("PENDING_COLLECTION")
   testOrders    TestOrder[]
   createdAt     DateTime        @default(now())
-}
-
-enum SpecimenType {
-  WHOLE_BLOOD
-  SERUM
-  PLASMA
-  URINE
-  STOOL
-  SPUTUM
-  SWAB
-  CSF
-  TISSUE
-  ASPIRATE
-  SCRAPING
-  OTHER
-}
-
-enum SampleCondition {
-  ACCEPTABLE
-  HAEMOLYSED
-  LIPAEMIC
-  ICTERIC
-  CLOTTED
-  INSUFFICIENT
-  WRONG_CONTAINER
-  UNLABELLED
-  REJECTED
-}
-
-enum SampleStatus {
-  PENDING_COLLECTION
-  COLLECTED
-  IN_TRANSIT
-  RECEIVED_LAB
-  IN_CENTRIFUGE
-  ALIQUOTED
-  IN_ANALYSIS
-  ANALYSIS_COMPLETE
-  STORED
-  DISPOSED
 }
 
 model TestOrder {
@@ -171,8 +95,8 @@ model TestOrder {
   testPanel     TestPanel?    @relation(fields: [testPanelId], references: [id])
   testCatalogId String
   testCatalog   TestCatalog   @relation(fields: [testCatalogId], references: [id])
-  urgency       Urgency       @default(ROUTINE)
-  status        OrderStatus   @default(PENDING)
+  urgency       String        @default("ROUTINE")
+  status        String        @default("PENDING")
   tatDeadline   DateTime?
   orderedAt     DateTime      @default(now())
   result        TestResult?
@@ -180,23 +104,13 @@ model TestOrder {
   referralTest  ReferralTest?
 }
 
-enum OrderStatus {
-  PENDING
-  IN_ANALYSIS
-  RESULTED
-  VALIDATED
-  REPORTED
-  REFERRED_OUT
-  CANCELLED
-}
-
 model TestCatalog {
   id              String          @id @default(cuid())
   code            String          @unique
   name            String
-  category        TestCategory
+  category        String
   department      String
-  specimenTypes   SpecimenType[]
+  specimenTypes   String          @default("[]")
   container       String
   sampleVolume    Float
   tatHoursRoutine Int             @default(24)
@@ -209,22 +123,6 @@ model TestCatalog {
   qcMaterials     QCMaterial[]
   active          Boolean         @default(true)
   createdAt       DateTime        @default(now())
-}
-
-enum TestCategory {
-  HAEMATOLOGY
-  BIOCHEMISTRY
-  MICROBIOLOGY
-  SEROLOGY_IMMUNOLOGY
-  HISTOPATHOLOGY
-  CYTOLOGY
-  PARASITOLOGY
-  URINALYSIS
-  COAGULATION
-  HORMONES
-  TUMOUR_MARKERS
-  DRUGS_TOXICOLOGY
-  OTHER
 }
 
 model TestParameter {
@@ -281,7 +179,7 @@ model TestResult {
   instrument       String?
   runId            String?
   technicianNote   String?
-  status           ResultStatus @default(PENDING)
+  status           String       @default("PENDING")
   enteredAt        DateTime?
   enteredBy        String?
   validatedAt      DateTime?
@@ -292,16 +190,6 @@ model TestResult {
   createdAt        DateTime     @default(now())
 }
 
-enum ResultStatus {
-  PENDING
-  ENTERED
-  DELTA_CHECK_FAILED
-  QC_FAILED
-  VALIDATED
-  AMENDED
-  CANCELLED
-}
-
 model ResultValue {
   id           String        @id @default(cuid())
   testResultId String
@@ -310,21 +198,8 @@ model ResultValue {
   parameter    TestParameter @relation(fields: [parameterId], references: [id])
   value        String
   numericValue Float?
-  flag         ResultFlag    @default(NORMAL)
+  flag         String        @default("NORMAL")
   flagNote     String?
-}
-
-enum ResultFlag {
-  NORMAL
-  LOW
-  HIGH
-  CRITICAL_LOW
-  CRITICAL_HIGH
-  ABNORMAL
-  POSITIVE
-  NEGATIVE
-  INDETERMINATE
-  SEE_NOTE
 }
 
 model QCMaterial {
@@ -347,21 +222,11 @@ model QCEntry {
   qcMaterial   QCMaterial @relation(fields: [qcMaterialId], references: [id])
   value        Float
   zScore       Float
-  rule         QCRule     @default(IN_CONTROL)
+  rule         String     @default("IN_CONTROL")
   note         String?
   runDate      DateTime   @default(now())
   enteredById  String
   enteredBy    User       @relation(fields: [enteredById], references: [id])
-}
-
-enum QCRule {
-  IN_CONTROL
-  WARNING_1_2S
-  REJECT_1_3S
-  REJECT_2_2S
-  REJECT_R_4S
-  REJECT_4_1S
-  REJECT_10X
 }
 
 model ReferralTest {
@@ -374,19 +239,10 @@ model ReferralTest {
   expectedBackAt  DateTime?
   receivedAt      DateTime?
   trackingRef     String?
-  status          ReferralStatus @default(PENDING)
+  status          String         @default("PENDING")
   cost            Float?
   notes           String?
   createdAt       DateTime       @default(now())
-}
-
-enum ReferralStatus {
-  PENDING
-  SENT
-  IN_TRANSIT
-  RECEIVED_BACK
-  RESULTED
-  REJECTED
 }
 
 model Report {
@@ -398,26 +254,11 @@ model Report {
   dispatchedAt   DateTime?
   dispatchedById String?
   dispatchedBy   User?            @relation("DispatchedBy", fields: [dispatchedById], references: [id])
-  deliveryMethod DeliveryMethod[]
+  deliveryMethod String           @default("[]")
   pdfUrl         String?
-  status         ReportStatus     @default(PENDING)
+  status         String           @default("PENDING")
   amendmentNote  String?
   amendedAt      DateTime?
-}
-
-enum DeliveryMethod {
-  PRINT
-  EMAIL
-  SMS
-  PORTAL
-  WHATSAPP
-}
-
-enum ReportStatus {
-  PENDING
-  GENERATED
-  DISPATCHED
-  AMENDED
 }
 
 model Invoice {
@@ -434,18 +275,10 @@ model Invoice {
   vatAmount       Float         @default(0)
   totalAmount     Float
   patientBalance  Float
-  status          InvoiceStatus @default(UNPAID)
+  status          String        @default("UNPAID")
   paidAt          DateTime?
   payments        Payment[]
   createdAt       DateTime      @default(now())
-}
-
-enum InvoiceStatus {
-  UNPAID
-  PARTIAL
-  PAID
-  VOID
-  CORPORATE
 }
 
 model BillingItem {
@@ -466,18 +299,10 @@ model Payment {
   invoiceId  String
   invoice    Invoice       @relation(fields: [invoiceId], references: [id])
   amount     Float
-  method     PaymentMethod
+  method     String
   reference  String?
   recordedAt DateTime      @default(now())
   recordedBy String
-}
-
-enum PaymentMethod {
-  CASH
-  CARD
-  BANK_TRANSFER
-  HMO
-  POS
 }
 
 model CorporateClient {
@@ -498,23 +323,12 @@ model CorporateClient {
 model Notification {
   id           String           @id @default(cuid())
   userId       String
-  type         NotificationType
+  type         String
   title        String
   message      String
   resourceLink String?
   read         Boolean          @default(false)
   createdAt    DateTime         @default(now())
-}
-
-enum NotificationType {
-  CRITICAL_RESULT
-  QC_FAILURE
-  TAT_BREACH
-  SAMPLE_REJECTED
-  REFERRAL_RECEIVED
-  RESULT_READY
-  LOW_QC_STOCK
-  PAYMENT_RECEIVED
 }
 
 model AuditLog {
@@ -525,7 +339,7 @@ model AuditLog {
   resourceType String
   resourceId   String
   ipAddress    String?
-  metadata     Json?
+  metadata     String?
   createdAt    DateTime @default(now())
 }
 

@@ -186,7 +186,7 @@ export function AdminUsersPage() {
               label="Email"
               value={createDraft.email}
               onChange={(event) => setCreateDraft((current) => ({ ...current, email: event.target.value }))}
-              placeholder="user@stdavidmedicaldiagnostic.org.ng"
+              placeholder="user@phenomlabs.com"
             />
             <Input
               label="Temporary password"

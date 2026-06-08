@@ -277,3 +277,54 @@ export type AuthUser = {
   role: Role;
   department?: string | null;
 };
+
+export const specimenTypeSchema = z.enum([
+  "WHOLE_BLOOD", "SERUM", "PLASMA", "URINE", "STOOL", 
+  "SPUTUM", "SWAB", "CSF", "TISSUE", "ASPIRATE", "SCRAPING", "OTHER"
+]);
+export type SpecimenType = z.infer<typeof specimenTypeSchema>;
+
+export const testCategorySchema = z.enum([
+  "HAEMATOLOGY", "BIOCHEMISTRY", "MICROBIOLOGY", "SEROLOGY_IMMUNOLOGY", 
+  "HISTOPATHOLOGY", "CYTOLOGY", "PARASITOLOGY", "URINALYSIS", "COAGULATION", 
+  "HORMONES", "TUMOUR_MARKERS", "DRUGS_TOXICOLOGY", "OTHER"
+]);
+export type TestCategory = z.infer<typeof testCategorySchema>;
+
+export const deliveryMethodSchema = z.enum(["PRINT", "EMAIL", "SMS", "PORTAL", "WHATSAPP"]);
+export type DeliveryMethod = z.infer<typeof deliveryMethodSchema>;
+
+export const reportStatusSchema = z.enum(["PENDING", "GENERATED", "DISPATCHED", "AMENDED"]);
+export type ReportStatus = z.infer<typeof reportStatusSchema>;
+
+export const invoiceStatusSchema = z.enum(["UNPAID", "PARTIAL", "PAID", "VOID", "CORPORATE"]);
+export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>;
+
+export const resultStatusSchema = z.enum([
+  "PENDING", "ENTERED", "DELTA_CHECK_FAILED", "QC_FAILED", 
+  "VALIDATED", "AMENDED", "CANCELLED"
+]);
+export type ResultStatus = z.infer<typeof resultStatusSchema>;
+
+export const resultFlagSchema = z.enum([
+  "NORMAL", "LOW", "HIGH", "CRITICAL_LOW", "CRITICAL_HIGH", 
+  "ABNORMAL", "POSITIVE", "NEGATIVE", "INDETERMINATE", "SEE_NOTE"
+]);
+export type ResultFlag = z.infer<typeof resultFlagSchema>;
+
+export const qcRuleSchema = z.enum([
+  "IN_CONTROL", "WARNING_1_2S", "REJECT_1_3S", "REJECT_2_2S", 
+  "REJECT_R_4S", "REJECT_4_1S", "REJECT_10X"
+]);
+export type QCRule = z.infer<typeof qcRuleSchema>;
+
+export const referralStatusSchema = z.enum([
+  "PENDING", "SENT", "IN_TRANSIT", "RECEIVED_BACK", "RESULTED", "REJECTED"
+]);
+export type ReferralStatus = z.infer<typeof referralStatusSchema>;
+
+export const notificationTypeSchema = z.enum([
+  "CRITICAL_RESULT", "QC_FAILURE", "TAT_BREACH", "SAMPLE_REJECTED", 
+  "REFERRAL_RECEIVED", "RESULT_READY", "LOW_QC_STOCK", "PAYMENT_RECEIVED"
+]);
+export type NotificationType = z.infer<typeof notificationTypeSchema>;

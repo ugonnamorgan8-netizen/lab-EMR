@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { createVisitHandler, listVisitsHandler, updateVisitStatusHandler } from "../controllers/visitController.js";
-import { Role } from "@prisma/client";
+import { Role } from "@shared/index";
 import { requireRole } from "../middleware/rbac.js";
 
 export const visitRouter = Router();
