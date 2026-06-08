@@ -45,7 +45,13 @@ export function createApp() {
       credentials: true,
     }),
   );
-  app.use(helmet());
+  app.use(
+    helmet({
+      crossOriginEmbedderPolicy: false,
+      contentSecurityPolicy: false,
+      frameguard: false,
+    })
+  );
   app.use(express.json({ limit: "5mb" }));
   app.use(cookieParser());
   app.use(apiRateLimiter);

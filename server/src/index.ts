@@ -10,6 +10,6 @@ const server = createServer(app);
 initSocketServer(server);
 startCronJobs();
 
-server.listen(config.port, () => {
+server.listen(config.port, "0.0.0.0", () => {
   console.log(`Lab EMR server listening on port ${config.port}`);
 });
