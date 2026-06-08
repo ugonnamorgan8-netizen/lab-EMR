@@ -328,3 +328,24 @@ export const notificationTypeSchema = z.enum([
   "REFERRAL_RECEIVED", "RESULT_READY", "LOW_QC_STOCK", "PAYMENT_RECEIVED"
 ]);
 export type NotificationType = z.infer<typeof notificationTypeSchema>;
+
+// Export runtime objects for all Zod enums so they can be used as values
+export const Role = roleSchema.enum;
+export const UserStatus = userStatusSchema.enum;
+export const Urgency = urgencySchema.enum;
+export const OrderStatus = orderStatusSchema.enum;
+export const VisitStatus = visitStatusSchema.enum;
+export const VisitType = visitTypeSchema.enum;
+export const PaymentMethod = paymentMethodSchema.enum;
+export const SampleCondition = sampleConditionSchema.enum;
+export const SampleStatus = sampleStatusSchema.enum;
+export const SpecimenType = specimenTypeSchema.enum;
+export const TestCategory = testCategorySchema.enum;
+export const DeliveryMethod = deliveryMethodSchema.enum;
+export const ReportStatus = reportStatusSchema.enum;
+export const InvoiceStatus = invoiceStatusSchema.enum;
+export const ResultStatus = resultStatusSchema.enum;
+export const ResultFlag = resultFlagSchema.enum;
+export const QCRule = qcRuleSchema.enum;
+export const ReferralStatus = referralStatusSchema.enum;
+export const NotificationType = notificationTypeSchema.enum;
