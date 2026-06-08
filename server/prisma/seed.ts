@@ -1,16 +1,16 @@
 import bcrypt from "bcryptjs";
 import dayjs from "dayjs";
 import { PrismaClient } from "@prisma/client";
-import { Role, SampleStatus, Urgency, VisitStatus } from "@shared/index";
+// Enum string literals (inlined to avoid runtime import issues)
 import { pathToFileURL } from "node:url";
 
 export const prisma = new PrismaClient();
 
 const users = [
-  ["Reception User", "reception@labemr.test", Role.RECEPTIONIST, "Reception"],
-  ["Accounts User", "accounts@labemr.test", Role.ACCOUNTS, "Accounts"],
-  ["Scientist User", "scientist@labemr.test", Role.LAB_SCIENTIST, "Laboratory"],
-  ["Supervisor User", "supervisor@labemr.test", Role.SUPERVISOR, "Management"],
+  ["Reception User", "reception@labemr.test", "RECEPTIONIST", "Reception"],
+  ["Accounts User", "accounts@labemr.test", "ACCOUNTS", "Accounts"],
+  ["Scientist User", "scientist@labemr.test", "LAB_SCIENTIST", "Laboratory"],
+  ["Supervisor User", "supervisor@labemr.test", "SUPERVISOR", "Management"],
 ] as const;
 
 const patients = Array.from({ length: 20 }).map((_, index) => ({
@@ -294,7 +294,7 @@ export async function seedDemoData() {
     },
   });
 
-  const qcOfficer = createdUsers.find((user) => user.role === Role.LAB_SCIENTIST)!;
+  const qcOfficer = createdUsers.find((user) => user.role === "LAB_SCIENTIST")!;
   for (const [index, testCatalogId] of [fbc.id, lft.id, glu.id].entries()) {
     const material = await prisma.qCMaterial.create({
       data: {
@@ -324,10 +324,10 @@ export async function seedDemoData() {
     }
   }
 
-  const receptionist = createdUsers.find((user) => user.role === Role.RECEPTIONIST)!;
-  const scientist = createdUsers.find((user) => user.role === Role.LAB_SCIENTIST)!;
-  const accountant = createdUsers.find((user) => user.role === Role.ACCOUNTS)!;
-  const supervisor = createdUsers.find((user) => user.role === Role.SUPERVISOR)!;
+  const receptionist = createdUsers.find((user) => user.role === "RECEPTIONIST")!;
+  const scientist = createdUsers.find((user) => user.role === "LAB_SCIENTIST")!;
+  const accountant = createdUsers.find((user) => user.role === "ACCOUNTS")!;
+  const supervisor = createdUsers.find((user) => user.role === "SUPERVISOR")!;
 
   for (let i = 0; i < 15; i += 1) {
     const patient = createdPatients[i];
@@ -336,20 +336,20 @@ export async function seedDemoData() {
         visitId: `VIS-20260426-${String(i + 1).padStart(4, "0")}`,
         patientId: patient.id,
         type: i % 4 === 0 ? "REFERRAL" : "WALK_IN",
-        urgency: i % 5 === 0 ? Urgency.STAT : i % 3 === 0 ? Urgency.URGENT : Urgency.ROUTINE,
+        urgency: i % 5 === 0 ? "STAT" : i % 3 === 0 ? "URGENT" : "ROUTINE",
         referringDoctor: patient.referringDoctor,
         referringFacility: patient.referringFacility,
         clinicalHistory: patient.clinicalHistory,
         status:
           i < 4
-            ? VisitStatus.REGISTERED
+            ? "REGISTERED"
             : i < 7
-              ? VisitStatus.SAMPLE_COLLECTED
+              ? "SAMPLE_COLLECTED"
               : i < 10
-                ? VisitStatus.IN_PROCESSING
+                ? "IN_PROCESSING"
                 : i < 12
-                  ? VisitStatus.VALIDATED
-                  : VisitStatus.DISPATCHED,
+                  ? "VALIDATED"
+                  : "DISPATCHED",
       },
     });
 
@@ -373,13 +373,13 @@ export async function seedDemoData() {
           container: group[0].container,
           volume: group.reduce((sum, item) => sum + item.sampleVolume, 0),
           status:
-            visit.status === VisitStatus.REGISTERED
-              ? SampleStatus.PENDING_COLLECTION
-              : visit.status === VisitStatus.SAMPLE_COLLECTED
-                ? SampleStatus.COLLECTED
-                : SampleStatus.IN_ANALYSIS,
-          collectedAt: visit.status === VisitStatus.REGISTERED ? null : dayjs().subtract(6, "hour").toDate(),
-          collectedById: visit.status === VisitStatus.REGISTERED ? null : scientist.id,
+            visit.status === "REGISTERED"
+              ? "PENDING_COLLECTION"
+              : visit.status === "SAMPLE_COLLECTED"
+                ? "COLLECTED"
+                : "IN_ANALYSIS",
+          collectedAt: visit.status === "REGISTERED" ? null : dayjs().subtract(6, "hour").toDate(),
+          collectedById: visit.status === "REGISTERED" ? null : scientist.id,
         },
       });
 
@@ -398,11 +398,11 @@ export async function seedDemoData() {
             testPanelId: i % 6 === 0 ? panel.id : null,
             urgency: visit.urgency,
             status:
-              visit.status === VisitStatus.REGISTERED
+              visit.status === "REGISTERED"
                 ? "PENDING"
-                : visit.status === VisitStatus.SAMPLE_COLLECTED
+                : visit.status === "SAMPLE_COLLECTED"
                   ? "PENDING"
-                  : visit.status === VisitStatus.IN_PROCESSING
+                  : visit.status === "IN_PROCESSING"
                     ? "IN_ANALYSIS"
                     : "VALIDATED",
             tatDeadline: dayjs(visit.registeredAt).add(hours, "hour").toDate(),
@@ -416,7 +416,7 @@ export async function seedDemoData() {
           testOrderId: order.id,
         });
 
-        if (visit.status === VisitStatus.VALIDATED || visit.status === VisitStatus.DISPATCHED) {
+        if (visit.status === "VALIDATED" || visit.status === "DISPATCHED") {
           const params = await prisma.testParameter.findMany({ where: { testCatalogId: test.id } });
           await prisma.testResult.create({
             data: {
@@ -472,16 +472,16 @@ export async function seedDemoData() {
       });
     }
 
-    if (visit.status === VisitStatus.VALIDATED || visit.status === VisitStatus.DISPATCHED) {
+    if (visit.status === "VALIDATED" || visit.status === "DISPATCHED") {
       await prisma.report.create({
         data: {
           reportId: `RPT-20260426-${String(i + 1).padStart(4, "0")}`,
           visitId: visit.id,
           generatedAt: dayjs().subtract(1, "hour").toDate(),
-          dispatchedAt: visit.status === VisitStatus.DISPATCHED ? dayjs().toDate() : null,
-          dispatchedById: visit.status === VisitStatus.DISPATCHED ? supervisor.id : null,
-          deliveryMethod: JSON.stringify(visit.status === VisitStatus.DISPATCHED ? ["PRINT", "EMAIL"] : []),
-          status: visit.status === VisitStatus.DISPATCHED ? "DISPATCHED" : "GENERATED",
+          dispatchedAt: visit.status === "DISPATCHED" ? dayjs().toDate() : null,
+          dispatchedById: visit.status === "DISPATCHED" ? supervisor.id : null,
+          deliveryMethod: JSON.stringify(visit.status === "DISPATCHED" ? ["PRINT", "EMAIL"] : []),
+          status: visit.status === "DISPATCHED" ? "DISPATCHED" : "GENERATED",
           pdfUrl: `/reports/${visit.visitId}.pdf`,
         },
       });
