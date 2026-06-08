@@ -15,12 +15,11 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Generate Prisma client (cd into server to run it directly)
+# Generate Prisma client
 RUN cd server && npx prisma generate
 
-# Build both client and server workspaces
+# Build the client (React/Vite)
 RUN npm run build --workspace=client
-RUN cd server && npm run build
 
 # Hugging Face Spaces requires the app to run on port 7860
 ENV PORT=7860
@@ -30,5 +29,5 @@ EXPOSE 7860
 RUN chown -R node:node /app
 USER node
 
-# Start command: push schema, conditionally seed, and start the server
-CMD ["sh", "-c", "cd server && npx prisma db push --accept-data-loss && npm run seed:maybe && cd /app && npm start"]
+# Start: push schema, seed if needed, then start the server with tsx (no tsc compilation needed)
+CMD ["sh", "-c", "cd /app/server && npx prisma db push --accept-data-loss && npx tsx prisma/maybeSeed.ts && npx tsx src/index.ts"]
