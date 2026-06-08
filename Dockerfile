@@ -23,6 +23,8 @@ RUN npm run build --workspace=client
 
 # Hugging Face Spaces requires the app to run on port 7860
 ENV PORT=7860
+# SQLite database path inside the container
+ENV DATABASE_URL="file:/app/server/prisma/dev.db"
 EXPOSE 7860
 
 # Hugging Face requires the container to run as a non-root user.
