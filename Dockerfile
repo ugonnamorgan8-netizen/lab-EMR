@@ -27,7 +27,8 @@ RUN ls -la /app/client/dist/
 # Hugging Face Spaces requires the app to run on port 7860
 ENV PORT=7860
 # DATABASE_URL must be set at runtime via HF Space secrets (PostgreSQL connection string)
-# e.g. postgresql://user:pass@host:5432/dbname
+# e.g. postgresql://user:pass@host:6543/dbname?pgbouncer=true
+# DIRECT_URL must point to port 5432 (direct connection string)
 ENV ENABLE_DEMO_SEED=true
 
 EXPOSE 7860

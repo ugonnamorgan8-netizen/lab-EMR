@@ -21,9 +21,10 @@ It uses the same PostgreSQL database (Supabase recommended) as any other deploym
 1. Create a new Supabase project at https://supabase.com.
 2. In the left sidebar, click `Connect`.
 3. In the connection panel, find the `Connection string` section.
-4. Copy the **Session pooler** Postgres URL → this is your `DATABASE_URL`.
+4. Copy the **Session pooler** Postgres URL → this is your `DATABASE_URL` (usually port `6543`).
+5. Copy the **Direct connection** Postgres URL → this is your `DIRECT_URL` (usually port `5432`).
 
-> **Note:** Only `DATABASE_URL` is required. The schema does not use a separate direct connection URL.
+> **Note:** Supabase requires using the direct connection URL (`DIRECT_URL`) for schema operations like migrations because transaction poolers on port `6543` block Prisma schema migrations.
 
 ## 2. Create a Hugging Face Space
 
@@ -53,7 +54,8 @@ In your Space, go to **Settings → Repository secrets** and add:
 
 | Secret name | Value |
 |---|---|
-| `DATABASE_URL` | Your Supabase Session pooler Postgres URL |
+| `DATABASE_URL` | Your Supabase Session pooler Postgres URL (port 6543) |
+| `DIRECT_URL` | Your Supabase Direct connection Postgres URL (port 5432) |
 | `JWT_ACCESS_SECRET` | A long random string (e.g. `openssl rand -hex 32`) |
 | `JWT_REFRESH_SECRET` | A different long random string |
 | `ENABLE_DEMO_SEED` | `true` (seeds demo accounts on first run) |
