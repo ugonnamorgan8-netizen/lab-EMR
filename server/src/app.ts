@@ -33,19 +33,17 @@ export function createApp() {
     clientDistCandidates[0];
   const hasBuiltClient = fs.existsSync(clientDistPath);
 
-  app.use(
-    cors({
-      origin(origin, callback) {
-        if (!origin || allowedOrigins.size === 0 || allowedOrigins.has(origin)) {
-          callback(null, true);
-          return;
-        }
+  const corsMiddleware = cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.size === 0 || allowedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error("Origin not allowed by CORS"));
+    },
+    credentials: true,
+  });
 
-        callback(new Error("Origin not allowed by CORS"));
-      },
-      credentials: true,
-    }),
-  );
   app.use(
     helmet({
       crossOriginEmbedderPolicy: false,
@@ -55,6 +53,10 @@ export function createApp() {
   );
   app.use(express.json({ limit: "5mb" }));
   app.use(cookieParser());
+  // CORS only on API routes — static assets are same-origin and must not be
+  // blocked by the origin allow-list check that Vite's crossorigin module
+  // scripts trigger even for same-origin fetches.
+  app.use("/api", corsMiddleware);
   app.use("/api", apiRateLimiter);
 
   app.get("/api/health", (_request, response) => {
