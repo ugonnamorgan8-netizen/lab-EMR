@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { MetricCard } from "../../components/shared/MetricCard";
 import { PageHero } from "../../components/shared/PageHero";
 import { StatusBadge } from "../../components/shared/StatusBadge";
@@ -12,10 +13,14 @@ import { queryKeys } from "../../services/queryKeys";
 import type { OutstandingInvoice } from "../../types/app";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { formatDate } from "../../utils/formatDate";
+import { PaymentReceiptModal } from "../billing/PaymentReceiptModal";
 
 export function OutstandingInvoicesPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+  const [receiptDetails, setReceiptDetails] = useState<any>(null);
+  
   const invoices = useQuery({
     queryKey: queryKeys.billingOutstanding(),
     queryFn: async () => {
@@ -32,9 +37,15 @@ export function OutstandingInvoicesPage() {
       });
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.billingOutstanding() });
       queryClient.invalidateQueries({ queryKey: queryKeys.billingDashboard() });
+      
+      // Load full invoice details to show in the receipt modal
+      setSelectedInvoice(data);
+      if (data.payments && data.payments.length > 0) {
+        setReceiptDetails(data.payments[data.payments.length - 1]);
+      }
     },
   });
 
@@ -75,7 +86,7 @@ export function OutstandingInvoicesPage() {
         />
         <MetricCard
           label="Average bill"
-          value={formatCurrency(invoices.data.length ? outstandingBalance / invoices.data.length : 0)}
+          value={invoices.data.length ? outstandingBalance / invoices.data.length : 0}
           hint="Average amount currently presented at the desk"
           icon="💳"
           variant="amber"
@@ -129,6 +140,19 @@ export function OutstandingInvoicesPage() {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* ── Payment Receipt Modal ─────────────────────────────────────── */}
+      {selectedInvoice && (
+        <PaymentReceiptModal
+          isOpen={true}
+          onClose={() => {
+            setSelectedInvoice(null);
+            setReceiptDetails(null);
+          }}
+          invoice={selectedInvoice}
+          paymentDetails={receiptDetails}
+        />
       )}
     </div>
   );

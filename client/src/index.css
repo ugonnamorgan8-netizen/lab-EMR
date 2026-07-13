@@ -35,3 +35,28 @@ body {
   to   { transform: scaleX(0); }
 }
 
+/* ── Receipt Print Styling ────────────────────────────────────────────────── */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12px;
+  }
+  /* Hide all navigation, sidebars, headers, and modal wrappers */
+  aside, header, nav, button, .print\:hidden {
+    display: none !important;
+  }
+  /* Maximize print layout container */
+  #root, main, .print\:p-0, .print\:static {
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    display: block !important;
+    height: auto !important;
+    width: 100% !important;
+    position: static !important;
+    overflow: visible !important;
+  }
+}
+

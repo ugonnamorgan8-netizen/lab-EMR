@@ -21,9 +21,11 @@ export function AppShell({
   useSocket();
 
   return (
-    <div className="min-h-screen bg-transparent md:flex">
+    // Desktop: lock to viewport height so sidebar is fixed and only content scrolls.
+    // Mobile: block flow (sidebar hidden, content min-h-screen with bottom bar padding).
+    <div className="bg-transparent md:flex md:h-screen md:overflow-hidden">
       <Sidebar items={navItems} />
-      <div className="flex min-h-screen flex-1 flex-col pb-24 md:pb-0">
+      <div className="flex min-h-screen flex-1 flex-col pb-24 md:min-h-0 md:overflow-y-auto md:pb-0">
         <Topbar title={title} subtitle={subtitle} userName={userName} userRole={userRole} onLogout={logout} />
         <PatientContextBanner />
         <main className="flex-1 px-4 py-5 md:px-6 md:py-6">{children}</main>
