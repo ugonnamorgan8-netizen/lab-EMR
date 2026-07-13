@@ -20,6 +20,7 @@ import { workflowRouter } from "./routes/workflowRoutes.js";
 
 export function createApp() {
   const app = express();
+  app.set("trust proxy", 1);
   const allowedOrigins = new Set(
     [config.clientUrl, "http://localhost:3000", "http://localhost:5173"].filter(Boolean),
   );
