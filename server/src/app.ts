@@ -21,9 +21,14 @@ import { workflowRouter } from "./routes/workflowRoutes.js";
 export function createApp() {
   const app = express();
   app.set("trust proxy", 1);
-  const allowedOrigins = new Set(
-    [config.clientUrl, "http://localhost:3000", "http://localhost:5173"].filter(Boolean),
-  );
+  // When CLIENT_URL is set (e.g. separate frontend deployment), enforce the
+  // allow-list plus localhost for dev. When CLIENT_URL is blank (same-origin
+  // deployment such as Hugging Face Spaces), leave the set empty so that the
+  // allowedOrigins.size === 0 branch permits every origin — the app and its
+  // API are already on the same host, so CORS is purely advisory here.
+  const allowedOrigins = config.clientUrl
+    ? new Set<string>([config.clientUrl, "http://localhost:3000", "http://localhost:5173"])
+    : new Set<string>();
   const clientDistCandidates = [
     path.resolve(process.cwd(), "client", "dist"),
     path.resolve(process.cwd(), "..", "client", "dist"),
