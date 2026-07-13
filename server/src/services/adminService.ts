@@ -1,5 +1,5 @@
-import bcrypt from "bcryptjs";
-import { OrderStatus, Role, UserStatus } from "@shared/index";
+﻿import bcrypt from "bcryptjs";
+import { OrderStatus, Role, UserStatus } from "@prisma/client";
 import type {
   AdminCatalogTestUpdateInput,
   AdminCatalogParameterInput,

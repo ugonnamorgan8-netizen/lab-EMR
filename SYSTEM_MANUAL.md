@@ -1,12 +1,12 @@
-# PHENOM LABS System Manual
+# ST. DAVID MEDICAL DIAGNOSTIC CENTRE System Manual
 
 ## Facility identity
 
-- Name: `PHENOM LABS`
-- Address: `Africa`
-- Email: `hello@phenomlabs.com`
-- Phone: ``
-- Website: `phenomlabs.com`
+- Name: `ST. DAVID MEDICAL DIAGNOSTIC CENTRE`
+- Address: `BERLIN PLAZA #NO 110 OGUI ROAD ENUGU STATE NIGERIA`
+- Email: `info@stdavidmedicaldiagnostic.org.ng`
+- Phone: `08100094967`
+- Website: `www.stdavidmedicaldiagnostic.org.ng`
 
 ## 1. Purpose of the system
 
@@ -954,7 +954,7 @@ const p = new PrismaClient();
 const hash = await bcrypt.hash('YourRealPassword1!', 10);
 await p.user.create({ data: {
   name: 'Dr. Ifeoma Balogun',
-  email: 'supervisor@phenomlabs.com',
+  email: 'supervisor@stdavidmedicaldiagnostic.org.ng',
   role: 'SUPERVISOR',
   department: 'Management',
   passwordHash: hash

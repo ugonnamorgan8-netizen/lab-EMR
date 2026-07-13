@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "server",
   "version": "0.1.0",
   "private": true,
@@ -8,7 +8,8 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server/src/index.js",
     "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push --accept-data-loss",
+    "prisma:prepare-roles": "prisma db execute --file prisma/normalize-legacy-roles.sql --schema prisma/schema.prisma",
+    "prisma:push": "npm run prisma:prepare-roles && prisma db push --accept-data-loss",
     "seed:maybe": "tsx prisma/maybeSeed.ts",
     "seed": "tsx prisma/seed.ts",
     "test": "vitest run --pool=threads",

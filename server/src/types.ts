@@ -1,5 +1,5 @@
-import type { Request } from "express";
-import type { Role } from "@shared/index";
+﻿import type { Request } from "express";
+import type { Role } from "@prisma/client";
 
 export type RequestUser = {
   id: string;

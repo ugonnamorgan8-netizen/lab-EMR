@@ -1,6 +1,6 @@
-import bcrypt from "bcryptjs";
+﻿import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { UserStatus } from "@shared/index";
+import { UserStatus } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 import { config } from "../config.js";
 import { readRefreshToken, signAccessToken, signRefreshToken } from "../middleware/auth.js";

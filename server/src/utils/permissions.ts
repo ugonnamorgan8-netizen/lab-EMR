@@ -1,4 +1,4 @@
-import type { Role } from "@shared/index";
+﻿import type { Role } from "@prisma/client";
 
 export const ROLE_PERMISSIONS: Record<Role, string[]> = {
   RECEPTIONIST: ["/reception/register", "/reception/new-visit"],

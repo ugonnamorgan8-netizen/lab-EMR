@@ -1,4 +1,4 @@
-import { Role } from "@shared/index";
+﻿import { Role } from "@prisma/client";
 import { Router } from "express";
 import {
   createQcRunHandler,

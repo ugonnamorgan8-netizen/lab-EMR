@@ -15,21 +15,26 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Generate Prisma client
+# Generate Prisma client (PostgreSQL provider)
 RUN cd server && npx prisma generate
 
 # Build the client (React/Vite)
 RUN npm run build --workspace=client
 
+# Verify client dist was built correctly
+RUN ls -la /app/client/dist/
+
 # Hugging Face Spaces requires the app to run on port 7860
 ENV PORT=7860
-# SQLite database path inside the container
-ENV DATABASE_URL="file:/app/server/prisma/dev.db"
+# DATABASE_URL must be set at runtime via HF Space secrets (PostgreSQL connection string)
+# e.g. postgresql://user:pass@host:5432/dbname
+ENV ENABLE_DEMO_SEED=true
+
 EXPOSE 7860
 
 # Hugging Face requires the container to run as a non-root user.
 RUN chown -R node:node /app
 USER node
 
-# Start: push schema, seed if needed, then start the server with tsx (no tsc compilation needed)
-CMD ["sh", "-c", "cd /app/server && npx prisma db push --accept-data-loss && npx tsx prisma/maybeSeed.ts && npx tsx src/index.ts"]
+# Start: push schema to PostgreSQL, optionally seed demo data, then start server
+CMD ["sh", "-c", "cd /app/server && echo '==> Pushing DB schema...' && npx prisma db push --accept-data-loss && echo '==> Running seed if needed...' && npx tsx prisma/maybeSeed.ts && echo '==> Starting server...' && npx tsx --tsconfig tsconfig.json src/index.ts"]

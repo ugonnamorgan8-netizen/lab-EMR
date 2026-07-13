@@ -1,6 +1,6 @@
-import { Router } from "express";
+﻿import { Router } from "express";
 import { listCatalogHandler } from "../controllers/catalogController.js";
-import { Role } from "@shared/index";
+import { Role } from "@prisma/client";
 import { requireRole } from "../middleware/rbac.js";
 
 export const catalogRouter = Router();

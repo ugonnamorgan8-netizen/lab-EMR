@@ -1,17 +1,15 @@
-import bcrypt from "bcryptjs";
+﻿import bcrypt from "bcryptjs";
 import dayjs from "dayjs";
-import { PrismaClient } from "@prisma/client";
-// Enum string literals (inlined to avoid runtime import issues)
+import { PrismaClient, Role, SampleStatus, Urgency, VisitStatus } from "@prisma/client";
 import { pathToFileURL } from "node:url";
-import { Urgency } from "@shared/index.js";
 
 export const prisma = new PrismaClient();
 
 const users = [
-  ["Reception User", "reception@labemr.test", "RECEPTIONIST", "Reception"],
-  ["Accounts User", "accounts@labemr.test", "ACCOUNTS", "Accounts"],
-  ["Scientist User", "scientist@labemr.test", "LAB_SCIENTIST", "Laboratory"],
-  ["Supervisor User", "supervisor@labemr.test", "SUPERVISOR", "Management"],
+  ["Reception User", "reception@labemr.test", Role.RECEPTIONIST, "Reception"],
+  ["Accounts User", "accounts@labemr.test", Role.ACCOUNTS, "Accounts"],
+  ["Scientist User", "scientist@labemr.test", Role.LAB_SCIENTIST, "Laboratory"],
+  ["Supervisor User", "supervisor@labemr.test", Role.SUPERVISOR, "Management"],
 ] as const;
 
 const patients = Array.from({ length: 20 }).map((_, index) => ({
@@ -31,7 +29,7 @@ const patients = Array.from({ length: 20 }).map((_, index) => ({
   referringDoctor: index % 2 === 0 ? "Dr. Bello" : "Dr. Uche",
   referringFacility: index % 2 === 0 ? "Prime Clinic" : "Wellness Centre",
   clinicalHistory: "Routine laboratory assessment",
-  allergies: JSON.stringify(index % 4 === 0 ? ["Penicillin"] : []),
+  allergies: index % 4 === 0 ? ["Penicillin"] : [],
 }));
 
 const catalogSeed = [
@@ -48,7 +46,7 @@ const catalogSeed = [
     tatHoursUrgent: 6,
     tatHoursStat: 2,
     parameters: [
-      // ── Red Cell Indices ────────────────────────────────────────────────────
+      // ΓöÇΓöÇ Red Cell Indices ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
       ["Haemoglobin (HGB)", "g/dL", 13.0, 17.0, 7.0, 20.0],
       ["RBC Count", "x10^12/L", 4.5, 5.5, 2.0, 7.0],
       ["Haematocrit (HCT/PCV)", "%", 40, 52, 20, 65],
@@ -57,7 +55,7 @@ const catalogSeed = [
       ["MCHC", "g/dL", 32, 36, 20, 42],
       ["RDW-CV", "%", 11.5, 14.5, 9.0, 25.0],
       ["RDW-SD", "fL", 35, 56, 20, 80],
-      // ── White Cell Total & Differential ────────────────────────────────────
+      // ΓöÇΓöÇ White Cell Total & Differential ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
       ["WBC Count", "x10^9/L", 4.0, 11.0, 2.0, 25.0],
       ["Neutrophils (Abs)", "x10^9/L", 1.8, 7.5, 0.5, 20.0],
       ["Neutrophils (%)", "%", 40, 75, 10, 95],
@@ -69,7 +67,7 @@ const catalogSeed = [
       ["Eosinophils (%)", "%", 1, 6, 0, 15],
       ["Basophils (Abs)", "x10^9/L", 0.0, 0.1, 0.0, 1.0],
       ["Basophils (%)", "%", 0, 1, 0, 5],
-      // ── Platelet Indices ────────────────────────────────────────────────────
+      // ΓöÇΓöÇ Platelet Indices ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
       ["Platelets (PLT)", "x10^9/L", 150, 450, 50, 1000],
       ["MPV", "fL", 7.4, 10.4, 5.0, 15.0],
       ["PDW", "%", 10, 18, 6, 25],
@@ -88,21 +86,21 @@ const catalogSeed = [
     tatHoursUrgent: 6,
     tatHoursStat: 2,
     parameters: [
-      // ── Bilirubin ──────────────────────────────────────────────────────────
-      ["Total Bilirubin", "µmol/L", 0, 21, 0, 200],
-      ["Direct (Conjugated) Bilirubin", "µmol/L", 0, 5, 0, 100],
-      ["Indirect Bilirubin", "µmol/L", 0, 16, 0, 150],
-      // ── Liver Enzymes ─────────────────────────────────────────────────────
+      // ΓöÇΓöÇ Bilirubin ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+      ["Total Bilirubin", "┬╡mol/L", 0, 21, 0, 200],
+      ["Direct (Conjugated) Bilirubin", "┬╡mol/L", 0, 5, 0, 100],
+      ["Indirect Bilirubin", "┬╡mol/L", 0, 16, 0, 150],
+      // ΓöÇΓöÇ Liver Enzymes ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
       ["ALT (Alanine Aminotransferase)", "U/L", 7, 45, 0, 500],
       ["AST (Aspartate Aminotransferase)", "U/L", 10, 40, 0, 500],
       ["ALP (Alkaline Phosphatase)", "U/L", 44, 147, 0, 1000],
       ["GGT (Gamma-Glutamyltransferase)", "U/L", 9, 48, 0, 500],
-      // ── Proteins ──────────────────────────────────────────────────────────
+      // ΓöÇΓöÇ Proteins ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
       ["Total Protein", "g/L", 60, 80, 30, 100],
       ["Albumin", "g/L", 35, 50, 15, 60],
       ["Globulin", "g/L", 20, 35, 10, 60],
       ["A/G Ratio", "", 1.2, 2.2, 0.5, 4.0],
-      // ── Coagulation (basic) ───────────────────────────────────────────────
+      // ΓöÇΓöÇ Coagulation (basic) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
       ["Prothrombin Time (PT)", "seconds", 11, 13.5, 8, 30],
     ],
   },
@@ -123,7 +121,7 @@ const catalogSeed = [
       ["2-Hr Post-Prandial Glucose", "mmol/L", 0, 7.8, 0, 33.3],
       ["Random Blood Glucose", "mmol/L", 3.9, 7.8, 2.2, 33.3],
       ["HbA1c", "%", 0, 5.6, 0, 15],
-      ["Serum Insulin (Fasting)", "µIU/mL", 2.6, 24.9, 0, 300],
+      ["Serum Insulin (Fasting)", "┬╡IU/mL", 2.6, 24.9, 0, 300],
     ],
   },
   {
@@ -139,21 +137,21 @@ const catalogSeed = [
     tatHoursUrgent: 6,
     tatHoursStat: 2,
     parameters: [
-      // ── Physical ──────────────────────────────────────────────────────────
+      // ΓöÇΓöÇ Physical ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
       ["Colour", "", 0, 0, 0, 0],
       ["Appearance (Turbidity)", "", 0, 0, 0, 0],
       ["Specific Gravity", "", 1.005, 1.030, 1.001, 1.040],
       ["pH", "", 4.5, 8.0, 4.0, 9.0],
-      // ── Dipstick Chemical ─────────────────────────────────────────────────
+      // ΓöÇΓöÇ Dipstick Chemical ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
       ["Protein", "", 0, 0, 0, 0],
       ["Glucose", "", 0, 0, 0, 0],
       ["Ketones", "", 0, 0, 0, 0],
       ["Bilirubin", "", 0, 0, 0, 0],
-      ["Urobilinogen", "µmol/L", 0, 17, 0, 200],
+      ["Urobilinogen", "┬╡mol/L", 0, 17, 0, 200],
       ["Nitrites", "", 0, 0, 0, 0],
       ["Leucocyte Esterase", "", 0, 0, 0, 0],
       ["Blood (Haemoglobin)", "", 0, 0, 0, 0],
-      // ── Microscopy ────────────────────────────────────────────────────────
+      // ΓöÇΓöÇ Microscopy ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
       ["Pus Cells (WBC)", "/hpf", 0, 5, 0, 100],
       ["RBC (Erythrocytes)", "/hpf", 0, 2, 0, 50],
       ["Epithelial Cells", "/hpf", 0, 5, 0, 50],
@@ -218,15 +216,15 @@ export async function seedDemoData() {
 
   await prisma.systemSetting.createMany({
     data: [
-      { key: "lab.name", value: "PHENOM LABS" },
-      { key: "lab.address", value: "Africa" },
-      { key: "lab.phone", value: "" },
-      { key: "lab.email", value: "hello@phenomlabs.com" },
-      { key: "lab.website", value: "phenomlabs.com" },
-      { key: "lab.director", value: "" },
-      { key: "lab.accreditation", value: "" },
-      { key: "lab.tagline", value: "We Build, Teach and Automate with AI." },
-      { key: "lab.logoUrl", value: "/favicon.svg" },
+      { key: "lab.name", value: "ST. DAVID MEDICAL DIAGNOSTIC CENTRE" },
+      { key: "lab.address", value: "BERLIN PLAZA #NO 110 OGUI ROAD ENUGU STATE NIGERIA" },
+      { key: "lab.phone", value: "08100094967" },
+      { key: "lab.email", value: "info@stdavidmedicaldiagnostic.org.ng" },
+      { key: "lab.website", value: "www.stdavidmedicaldiagnostic.org.ng" },
+      { key: "lab.director", value: "Dr. Ifeoma Balogun, FMCPath" },
+      { key: "lab.accreditation", value: "MLSCN-ACC-2026-014" },
+      { key: "lab.tagline", value: "Excellence in Diagnostic Services" },
+      { key: "lab.logoUrl", value: "/lab-logo.jpeg" },
     ],
   });
 
@@ -243,7 +241,7 @@ export async function seedDemoData() {
         name: catalog.name,
         category: catalog.category as never,
         department: catalog.department,
-        specimenTypes: JSON.stringify(catalog.specimenTypes),
+        specimenTypes: catalog.specimenTypes as never,
         container: catalog.container,
         sampleVolume: catalog.sampleVolume,
         price: catalog.price,
@@ -295,7 +293,7 @@ export async function seedDemoData() {
     },
   });
 
-  const qcOfficer = createdUsers.find((user) => user.role === "LAB_SCIENTIST")!;
+  const qcOfficer = createdUsers.find((user) => user.role === Role.LAB_SCIENTIST)!;
   for (const [index, testCatalogId] of [fbc.id, lft.id, glu.id].entries()) {
     const material = await prisma.qCMaterial.create({
       data: {
@@ -325,10 +323,10 @@ export async function seedDemoData() {
     }
   }
 
-  const receptionist = createdUsers.find((user) => user.role === "RECEPTIONIST")!;
-  const scientist = createdUsers.find((user) => user.role === "LAB_SCIENTIST")!;
-  const accountant = createdUsers.find((user) => user.role === "ACCOUNTS")!;
-  const supervisor = createdUsers.find((user) => user.role === "SUPERVISOR")!;
+  const receptionist = createdUsers.find((user) => user.role === Role.RECEPTIONIST)!;
+  const scientist = createdUsers.find((user) => user.role === Role.LAB_SCIENTIST)!;
+  const accountant = createdUsers.find((user) => user.role === Role.ACCOUNTS)!;
+  const supervisor = createdUsers.find((user) => user.role === Role.SUPERVISOR)!;
 
   for (let i = 0; i < 15; i += 1) {
     const patient = createdPatients[i];
@@ -337,20 +335,20 @@ export async function seedDemoData() {
         visitId: `VIS-20260426-${String(i + 1).padStart(4, "0")}`,
         patientId: patient.id,
         type: i % 4 === 0 ? "REFERRAL" : "WALK_IN",
-        urgency: i % 5 === 0 ? "STAT" : i % 3 === 0 ? "URGENT" : "ROUTINE",
+        urgency: i % 5 === 0 ? Urgency.STAT : i % 3 === 0 ? Urgency.URGENT : Urgency.ROUTINE,
         referringDoctor: patient.referringDoctor,
         referringFacility: patient.referringFacility,
         clinicalHistory: patient.clinicalHistory,
         status:
           i < 4
-            ? "REGISTERED"
+            ? VisitStatus.REGISTERED
             : i < 7
-              ? "SAMPLE_COLLECTED"
+              ? VisitStatus.SAMPLE_COLLECTED
               : i < 10
-                ? "IN_PROCESSING"
+                ? VisitStatus.IN_PROCESSING
                 : i < 12
-                  ? "VALIDATED"
-                  : "DISPATCHED",
+                  ? VisitStatus.VALIDATED
+                  : VisitStatus.DISPATCHED,
       },
     });
 
@@ -374,13 +372,13 @@ export async function seedDemoData() {
           container: group[0].container,
           volume: group.reduce((sum, item) => sum + item.sampleVolume, 0),
           status:
-            visit.status === "REGISTERED"
-              ? "PENDING_COLLECTION"
-              : visit.status === "SAMPLE_COLLECTED"
-                ? "COLLECTED"
-                : "IN_ANALYSIS",
-          collectedAt: visit.status === "REGISTERED" ? null : dayjs().subtract(6, "hour").toDate(),
-          collectedById: visit.status === "REGISTERED" ? null : scientist.id,
+            visit.status === VisitStatus.REGISTERED
+              ? SampleStatus.PENDING_COLLECTION
+              : visit.status === VisitStatus.SAMPLE_COLLECTED
+                ? SampleStatus.COLLECTED
+                : SampleStatus.IN_ANALYSIS,
+          collectedAt: visit.status === VisitStatus.REGISTERED ? null : dayjs().subtract(6, "hour").toDate(),
+          collectedById: visit.status === VisitStatus.REGISTERED ? null : scientist.id,
         },
       });
 
@@ -399,11 +397,11 @@ export async function seedDemoData() {
             testPanelId: i % 6 === 0 ? panel.id : null,
             urgency: visit.urgency,
             status:
-              visit.status === "REGISTERED"
+              visit.status === VisitStatus.REGISTERED
                 ? "PENDING"
-                : visit.status === "SAMPLE_COLLECTED"
+                : visit.status === VisitStatus.SAMPLE_COLLECTED
                   ? "PENDING"
-                  : visit.status === "IN_PROCESSING"
+                  : visit.status === VisitStatus.IN_PROCESSING
                     ? "IN_ANALYSIS"
                     : "VALIDATED",
             tatDeadline: dayjs(visit.registeredAt).add(hours, "hour").toDate(),
@@ -417,7 +415,7 @@ export async function seedDemoData() {
           testOrderId: order.id,
         });
 
-        if (visit.status === "VALIDATED" || visit.status === "DISPATCHED") {
+        if (visit.status === VisitStatus.VALIDATED || visit.status === VisitStatus.DISPATCHED) {
           const params = await prisma.testParameter.findMany({ where: { testCatalogId: test.id } });
           await prisma.testResult.create({
             data: {
@@ -473,16 +471,16 @@ export async function seedDemoData() {
       });
     }
 
-    if (visit.status === "VALIDATED" || visit.status === "DISPATCHED") {
+    if (visit.status === VisitStatus.VALIDATED || visit.status === VisitStatus.DISPATCHED) {
       await prisma.report.create({
         data: {
           reportId: `RPT-20260426-${String(i + 1).padStart(4, "0")}`,
           visitId: visit.id,
           generatedAt: dayjs().subtract(1, "hour").toDate(),
-          dispatchedAt: visit.status === "DISPATCHED" ? dayjs().toDate() : null,
-          dispatchedById: visit.status === "DISPATCHED" ? supervisor.id : null,
-          deliveryMethod: JSON.stringify(visit.status === "DISPATCHED" ? ["PRINT", "EMAIL"] : []),
-          status: visit.status === "DISPATCHED" ? "DISPATCHED" : "GENERATED",
+          dispatchedAt: visit.status === VisitStatus.DISPATCHED ? dayjs().toDate() : null,
+          dispatchedById: visit.status === VisitStatus.DISPATCHED ? supervisor.id : null,
+          deliveryMethod: visit.status === VisitStatus.DISPATCHED ? ["PRINT", "EMAIL"] : [],
+          status: visit.status === VisitStatus.DISPATCHED ? "DISPATCHED" : "GENERATED",
           pdfUrl: `/reports/${visit.visitId}.pdf`,
         },
       });
@@ -494,7 +492,7 @@ export async function seedDemoData() {
         action: "CREATE_VISIT",
         resourceType: "Visit",
         resourceId: visit.id,
-        metadata: JSON.stringify({ visitId: visit.visitId, status: visit.status }),
+        metadata: { visitId: visit.visitId, status: visit.status },
       },
     });
   }
