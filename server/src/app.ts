@@ -55,7 +55,7 @@ export function createApp() {
   );
   app.use(express.json({ limit: "5mb" }));
   app.use(cookieParser());
-  app.use(apiRateLimiter);
+  app.use("/api", apiRateLimiter);
 
   app.get("/api/health", (_request, response) => {
     response.json({ ok: true });
